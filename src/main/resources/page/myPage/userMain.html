@@ -30,11 +30,11 @@
                 <el-submenu index="2">
                     <template slot="title"><i class="el-icon-date"></i>商品分类</template>
                     <el-menu-item-group>
-                        <el-menu-item index="2-1" @click="getSCategory('衣物')">衣物</el-menu-item>
-                        <el-menu-item index="2-2" @click="getSCategory('文具')">文具</el-menu-item>
-                        <el-menu-item index="2-3" @click="getSCategory('书籍')">书籍</el-menu-item>
-                        <el-menu-item index="2-4" @click="getSCategory('日用品')">日用品</el-menu-item>
-                        <el-menu-item index="2-5" @click="getSCategory('杂物')">杂物</el-menu-item>
+                        <el-menu-item index="2-1" @click="getGCategory('衣物')">衣物</el-menu-item>
+                        <el-menu-item index="2-2" @click="getGCategory('文具')">文具</el-menu-item>
+                        <el-menu-item index="2-3" @click="getGCategory('书籍')">书籍</el-menu-item>
+                        <el-menu-item index="2-4" @click="getGCategory('日用品')">日用品</el-menu-item>
+                        <el-menu-item index="2-5" @click="getGCategory('杂物')">杂物</el-menu-item>
                     </el-menu-item-group>
                 </el-submenu>
                 <el-submenu index="3">
@@ -316,43 +316,8 @@
                     this.$message(res.data.msg);
                 })
             },
-            aaa(){
-                //测试方法
-                this.$message("我是测试方法");
-            },
-            getSCategory(SCategory) {
-                axios.get("/Goods/getSCategory/"+SCategory).then((res)=>{
-                    this.dataList = res.data.data;
-                });
-            },
-
-            //点击衣物
-            getOne() {
-                axios.get("/Goods/getOne").then((res)=>{
-                    this.dataList = res.data.data;
-                });
-            },
-            //点击文具
-            getTwo() {
-                axios.get("/Goods/getTwo").then((res)=>{
-                    this.dataList = res.data.data;
-                });
-            },
-            //点击书籍
-            getThree() {
-                axios.get("/Goods/getThree").then((res)=>{
-                    this.dataList = res.data.data;
-                });
-            },
-            //点击日用品
-            getFour() {
-                axios.get("/Goods/getFour").then((res)=>{
-                    this.dataList = res.data.data;
-                });
-            },
-            //点击杂物
-            getFive() {
-                axios.get("/Goods/getFive").then((res)=>{
+            getGCategory(gCategory) {
+                axios.get("/Goods/getGCategory/"+gCategory).then((res)=>{
                     this.dataList = res.data.data;
                 });
             },

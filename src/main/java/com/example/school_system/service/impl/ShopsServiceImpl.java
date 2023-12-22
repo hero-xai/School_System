@@ -32,4 +32,33 @@ public class ShopsServiceImpl extends ServiceImpl<ShopsMapper, Shops> implements
         r.setCode(HttpStatus.SUCCESS);
         return r;
     }
+
+    /**
+     * 修改审核状态
+     * @param id
+     * @return
+     */
+    @Override
+    public R updateStatus(int id) {
+        R r=new R();
+        LambdaQueryWrapper<Shops> wrapper=new LambdaQueryWrapper();
+        wrapper.eq(Shops::getId,id);
+        Shops one = this.getOne(wrapper);
+
+        if(one.getAutoStatus()==0){
+            one.setAutoStatus(1);
+            this.saveOrUpdate(one);
+            r.setMsg("审核未通过");
+            r.setCode(HttpStatus.SUCCESS);
+        } else if (one.getAutoStatus()==1) {
+            one.setAutoStatus(0);
+            this.saveOrUpdate(one);
+            r.setMsg("审核通过");
+            r.setCode(HttpStatus.SUCCESS);
+        }
+
+        return r;
+
+        //todo 审核完是否加入其他表
+    }
 }

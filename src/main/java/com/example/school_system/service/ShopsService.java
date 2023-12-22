@@ -8,4 +8,6 @@ public interface ShopsService extends IService<Shops> {
     R queryShopsList();
 
     R queryBySCategory(String sCategory);
+
+    R updateStatus(int id);
 }

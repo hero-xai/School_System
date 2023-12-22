@@ -30,11 +30,11 @@
                 <el-submenu index="2">
                     <template slot="title"><i class="el-icon-message"></i>商品管理</template>
                     <el-menu-item-group>
-                        <el-menu-item index="2-1" @click="getOne()">衣物</el-menu-item>
-                        <el-menu-item index="2-2" @click="getTwo()">文具</el-menu-item>
-                        <el-menu-item index="2-3" @click="getThree()">书籍</el-menu-item>
-                        <el-menu-item index="2-4" @click="getFour()">日用品</el-menu-item>
-                        <el-menu-item index="2-5" @click="getFive()">杂物</el-menu-item>
+                        <el-menu-item index="2-1" @click="getSCategory('衣物')">衣物</el-menu-item>
+                        <el-menu-item index="2-2" @click="getSCategory('文具')">文具</el-menu-item>
+                        <el-menu-item index="2-3" @click="getSCategory('书籍')">书籍</el-menu-item>
+                        <el-menu-item index="2-4" @click="getSCategory('日用品')">日用品</el-menu-item>
+                        <el-menu-item index="2-5" @click="getSCategory('杂物')">杂物</el-menu-item>
                     </el-menu-item-group>
                 </el-submenu>
 
@@ -47,7 +47,6 @@
                     <i class="el-icon-setting" style="margin-right: 15px"></i>
                     <el-dropdown-menu slot="dropdown">
                         <el-dropdown-item @click.native="getMy()">查看个人信息</el-dropdown-item>
-                        <!--审核信息记录表？-->
                         <el-dropdown-item @click.native="getMyGoods()">审核信息显示</el-dropdown-item>
                         <el-dropdown-item @click.native="logout()">退出登录</el-dropdown-item>
                     </el-dropdown-menu>
@@ -80,6 +79,7 @@
                                     active-value="1"
                                     inactive-value="0"
                             @change="getStatus(scope.row)">
+                                <!--状态变化有问题-->
                             </el-switch>
                         </template>
                     </el-table-column>
@@ -211,8 +211,8 @@
                     </div><!-- /.modal-content -->
                 </div><!-- /.modal-dialog -->
             </div><!-- /.modal -->
-
-
+        </el-container>
+    </el-container>
 </div>
 <script src="../../js/vue.js"></script>
 <script src="../../element-ui/lib/index.js"></script>
@@ -300,46 +300,17 @@
                     }
                 })
             },
-            aaa(){
-                //测试方法
-                this.$message("测试");
-            },
-            //点击衣物
-            getOne() {
-                axios.get("/Shops/getOne").then((res)=>{
-                    this.dataList = res.data.data;
-                });
-            },
-            //点击文具
-            getTwo() {
-                axios.get("/Shops/getTwo").then((res)=>{
-                    this.dataList = res.data.data;
-                });
-            },
-            //点击书籍
-            getThree() {
-                axios.get("/Shops/getThree").then((res)=>{
-                    this.dataList = res.data.data;
-                });
-            },
-            //点击日用品
-            getFour() {
-                axios.get("/Shops/getFour").then((res)=>{
-                    this.dataList = res.data.data;
-                });
-            },
-            //点击杂物
-            getFive() {
-                axios.get("/Shops/getFive").then((res)=>{
+            getSCategory(SCategory) {
+                axios.get("/Shops/getSCategory/"+SCategory).then((res)=>{
                     this.dataList = res.data.data;
                 });
             },
             //改变审核状态
             getStatus(row){
-                axios.put("/Shops/getStatus/"+row.id).then((res)=>{
+                axios.put("/Shops/updateStatus/"+row.id).then((res)=>{
                     //this.dataList = res.data.data;
-                    this.value=res.data.data.autoStatus;
                     this.$message(res.data.msg);
+                    this.getAll();
                 });
 
             },
@@ -370,8 +341,7 @@
                 $("#myModal").modal("show");
             },
             getMyGoods(){
-                axios.get("/Goods/getMy").then((res)=>{
-                    // this.dataList = res.data.data;
+                axios.get("/Goods/getMyAudit").then((res)=>{
                     console.log(res);
                    this.goodsList=res.data.data;
                     $("#myGoodsModal").modal("show");

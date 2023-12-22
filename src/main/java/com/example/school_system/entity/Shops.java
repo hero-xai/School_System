@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 /***
- * 商品表实体类
+ * 商品表实体类   所有商品  未经审核的
  * */
 @Data
 public class Shops {

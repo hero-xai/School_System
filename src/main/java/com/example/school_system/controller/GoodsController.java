@@ -47,23 +47,13 @@ public class GoodsController {
     }
 
     /***
-     * 获取登录者信息
+     * 获取登陆人审核的商品信息
      * @return
      */
-    @GetMapping("/getMy")
+    @GetMapping("/getMyAudit")
     @ResponseBody
     public R getMy(HttpServletRequest request){
-        R r=new R();
-        Object user = request.getSession().getAttribute("user");
-        String username=(String)user;
-
-        LambdaQueryWrapper<Goods> wrapper=new LambdaQueryWrapper<>();
-        wrapper.eq(Goods::getAutoId,username);
-        List<Goods> list = goodsService.list(wrapper);
-        //System.out.print(user);
-        r.setData(list);
-        r.setCode(1);
-        return r;
+       return goodsService.getMyAudit(request);
     }
 
     //以状态查询商品列表，1为可见状态
@@ -80,88 +70,13 @@ public class GoodsController {
     }
 
     /***
-     * 获取衣物
+     * 获取不同物品列表
      * @return
      */
-    @GetMapping("/getOne")
+    @GetMapping("/getGCategory/{gCategory}")
     @ResponseBody
-    public R getOne(){
-        R r=new R();
-        LambdaQueryWrapper<Goods> wrapper=new LambdaQueryWrapper<Goods>();
-        wrapper.eq(Goods::getAutoStatus,1);
-        wrapper.eq(Goods::getgCategory,"衣物");
-        List<Goods> list = goodsService.list(wrapper);
-        r.setData(list);
-        r.setCode(1);
-        return r;
-    }
-
-    /***
-     * 获取文具
-     * @return
-     */
-    @GetMapping("/getTwo")
-    @ResponseBody
-    public R getTwo(){
-        R r=new R();
-        LambdaQueryWrapper<Goods> wrapper=new LambdaQueryWrapper<Goods>();
-        wrapper.eq(Goods::getAutoStatus,1);
-        wrapper.eq(Goods::getgCategory,"文具");
-        List<Goods> list = goodsService.list(wrapper);
-        r.setData(list);
-        r.setCode(1);
-        return r;
-    }
-
-    /***
-     * 获取书籍
-     * @return
-     */
-    @GetMapping("/getThree")
-    @ResponseBody
-    public R getThree(){
-        R r=new R();
-        LambdaQueryWrapper<Goods> wrapper=new LambdaQueryWrapper<Goods>();
-        wrapper.eq(Goods::getAutoStatus,1);
-        wrapper.eq(Goods::getgCategory,"书籍");
-        List<Goods> list = goodsService.list(wrapper);
-        r.setData(list);
-        r.setCode(1);
-        return r;
-    }
-
-    /***
-     * 获取日用品
-     * @return
-     */
-    @GetMapping("/getFour")
-    @ResponseBody
-    public R getFour(){
-        R r=new R();
-        LambdaQueryWrapper<Goods> wrapper=new LambdaQueryWrapper<Goods>();
-        wrapper.eq(Goods::getAutoStatus,1);
-        wrapper.eq(Goods::getgCategory,"日用品");
-        List<Goods> list = goodsService.list(wrapper);
-        r.setData(list);
-        r.setCode(1);
-        return r;
-    }
-
-    /***
-     * 获取杂物
-     * @return
-     */
-    @GetMapping("/getFive")
-    @ResponseBody
-    public R getFive(){
-        R r=new R();
-        LambdaQueryWrapper<Goods> wrapper=new LambdaQueryWrapper<Goods>();
-        wrapper.eq(Goods::getAutoStatus,1);
-        wrapper.eq(Goods::getgCategory,"杂物");
-        List<Goods> list = goodsService.list(wrapper);
-        r.setData(list);
-        r.setCode(1);
-        return r;
+    public R getGCategory(@PathVariable String gCategory){
+        return goodsService.queryByGCategory(gCategory);
     }
 
     /***

@@ -41,104 +41,15 @@ public class ShopsController {
         return shopsService.queryBySCategory(sCategory);
     }
 
-    /***
-     * 获取衣物
+    /**
+     * 改变审核状态
+     * @param id
      * @return
      */
-    @GetMapping("/getOne")
-    @ResponseBody
-    public R getOne(){
-        R r=new R();
-        LambdaQueryWrapper<Shops> wrapper=new LambdaQueryWrapper();
-        wrapper.eq(Shops::getSCategory,"衣物");
-        List shopsList = shopsService.list(wrapper);
-        r.setData(shopsList);
-        r.setCode(1);
-        return r;
-    }
-
-    /***
-     * 获取文具
-     * @return
-     */
-    @GetMapping("/getTwo")
-    @ResponseBody
-    public R getTwo(){
-        R r=new R();
-        LambdaQueryWrapper<Shops> wrapper=new LambdaQueryWrapper();
-        wrapper.eq(Shops::getSCategory,"文具");
-        List shopsList = shopsService.list(wrapper);
-        r.setData(shopsList);
-        r.setCode(1);
-        return r;
-    }
-
-    /***
-     * 获取书籍
-     * @return
-     */
-    @GetMapping("/getThree")
-    @ResponseBody
-    public R getThree(){
-        R r=new R();
-        LambdaQueryWrapper<Shops> wrapper=new LambdaQueryWrapper();
-        wrapper.eq(Shops::getSCategory,"书籍");
-        List shopsList = shopsService.list(wrapper);
-        r.setData(shopsList);
-        r.setCode(1);
-        return r;
-    }
-
-    /***
-     * 获取日用品
-     * @return
-     */
-    @GetMapping("/getFour")
-    @ResponseBody
-    public R getFour(){
-        R r=new R();
-        LambdaQueryWrapper<Shops> wrapper=new LambdaQueryWrapper();
-        wrapper.eq(Shops::getSCategory,"日用品");
-        List shopsList = shopsService.list(wrapper);
-        r.setData(shopsList);
-        r.setCode(1);
-        return r;
-    }
-
-    /***
-     * 获取杂物
-     * @return
-     */
-    @GetMapping("/getFive")
-    @ResponseBody
-    public R getFive(){
-        R r=new R();
-        LambdaQueryWrapper<Shops> wrapper=new LambdaQueryWrapper();
-        wrapper.eq(Shops::getSCategory,"杂物");
-        List shopsList = shopsService.list(wrapper);
-        r.setData(shopsList);
-        r.setCode(1);
-        return r;
-    }
-
-    @PutMapping("/getStatus/{id}")
+    @PutMapping("/updateStatus/{id}")
     @ResponseBody
     public R getStatus(@PathVariable int id){
-        R r=new R();
-        LambdaQueryWrapper<Shops> wrapper=new LambdaQueryWrapper();
-        wrapper.eq(Shops::getId,id);
-        Shops one = shopsService.getOne(wrapper);
-
-        if(one.getAutoStatus()==0){
-            one.setAutoStatus(1);
-        } else if (one.getAutoStatus()==1) {
-            one.setAutoStatus(0);
-        }
-        boolean b = shopsService.saveOrUpdate(one);
-        r.setCode(1);
-        r.setData(one);
-        r.setMsg("状态已改变");
-        return r;
+        return shopsService.updateStatus(id);
     }
 
 
