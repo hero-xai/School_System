@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>普通用户页面</title>
+
+    <style>
+        .el-header {
+            background-color: #B3C0D1;
+            color: #333;
+            line-height: 60px;
+        }
+
+        .el-aside {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+<div id="admin">
+    <el-container style="height: 500px; border: 1px solid #eee">
+        <el-aside width="200px" style="background-color: rgb(238, 241, 246)">
+            <el-menu :default-openeds="['1', '2']">
+                <el-submenu index="1">
+                    <template slot="title"><i class="el-icon-menu"></i>商品一览</template>
+                    <el-menu-item-group>
+                        <el-menu-item index="1-1" @click="getAll()">全部商品</el-menu-item>
+                    </el-menu-item-group>
+                </el-submenu>
+                <el-submenu index="2">
+                    <template slot="title"><i class="el-icon-date"></i>商品分类</template>
+                    <el-menu-item-group>
+                        <el-menu-item index="2-1" @click="getSCategory('衣物')">衣物</el-menu-item>
+                        <el-menu-item index="2-2" @click="getSCategory('文具')">文具</el-menu-item>
+                        <el-menu-item index="2-3" @click="getSCategory('书籍')">书籍</el-menu-item>
+                        <el-menu-item index="2-4" @click="getSCategory('日用品')">日用品</el-menu-item>
+                        <el-menu-item index="2-5" @click="getSCategory('杂物')">杂物</el-menu-item>
+                    </el-menu-item-group>
+                </el-submenu>
+                <el-submenu index="3">
+                    <template slot="title"><i class="el-icon-reading"></i>我的商品</template>
+                    <el-menu-item-group>
+                        <el-menu-item index="3-1" @click="toMyThing()">我的货架</el-menu-item>
+                    </el-menu-item-group>
+                </el-submenu>
+                <el-submenu index="4">
+                    <template slot="title"><i class="el-icon-shopping-cart-2"></i>我的购物车</template>
+                    <el-menu-item-group>
+                        <el-menu-item index="4-1" @click="toMyShopping()">购物车</el-menu-item>
+                    </el-menu-item-group>
+                </el-submenu>
+                <el-submenu index="5">
+                    <template slot="title"><i class="el-icon-sold-out"></i>历史记录</template>
+                    <el-menu-item-group>
+                        <el-menu-item index="5-1" @click="toMyHistory()">历史订单</el-menu-item>
+                    </el-menu-item-group>
+                </el-submenu>
+
+            </el-menu>
+        </el-aside>
+
+        <el-container >
+            <el-header style="text-align: right; font-size: 12px">
+                <el-dropdown>
+                    <i class="el-icon-setting" style="margin-right: 15px"></i>
+                    <el-dropdown-menu slot="dropdown">
+                        <el-dropdown-item @click.native="getMy()">查看个人信息</el-dropdown-item>
+                    </el-dropdown-menu>
+                </el-dropdown>
+                <span>普通用户</span>
+            </el-header>
+
+            <!--主模块显示数据-->
+            <el-main>
+                <!--需要关注商品名进行-->
+                <el-input placeholder="商品名称" v-model="selectName" style="width: 200px;" class="filter-item"></el-input>
+                <el-input placeholder="商品简介" v-model="selectDesc" style="width: 200px;" class="filter-item"></el-input>
+
+                <el-button type="primary" round @click="getByLike" >查询商品</el-button>
+
+                <el-input placeholder="商品价格" v-model="selectPrice" style="width: 200px;" class="filter-item"></el-input>
+                <el-button @click="getUp()" type="primary" round><i class="el-icon-top"></i></el-button>
+                <el-button @click="getDown()" type="primary" round><i class="el-icon-bottom"></i></el-button>
+
+
+                <el-table size="small" current-row-key="id" :data="dataList" stripe highlight-current-row>
+                    <el-table-column prop="goodsName" align="center" label="商品名称"></el-table-column>
+                    <el-table-column prop="goodsPic" label="商品图片" align="center">
+                        <template slot-scope="scope">
+                            <img :src="scope.row.goodsPic" width="40" height="40"/>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="goodsDesc" label="商品信息简介" align="center"></el-table-column>
+                    <el-table-column prop="goodsPrice" label="商品价格" align="center"></el-table-column>
+                    <el-table-column label="操作" align="center">
+                        <template slot-scope="scope">
+                            <el-button type="primary" size="mini" @click="select(scope.row)">详情</el-button>
+                            <el-button type="primary" size="mini" @click="up(scope.row)">加入购物车</el-button>
+                        </template>
+                    </el-table-column>
+
+                </el-table>
+            </el-main>
+            </el-container>
+            <!--显示商品详情-->
+            <div class="modal" id="goodsModal">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title" >商品详情查看</h4>
+                            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <p align="center">商品名称 : {{goodsName}}</p>
+                            <p align="center">商品价格 : {{goodsPrice}}</p>
+                            <p align="center">商品图片 :
+                            <div class="demo-image" align="center">
+                                <el-image
+                                        style="width: 200px; height: 200px"
+                                        :src="goodsPic">
+                                </el-image>
+                            </div>
+                            </p>
+                            <p align="center">商品描述 : {{goodsDesc}}</p>
+                            <p align="center">出售地址 : {{goodsAddress}}</p>
+                            <p align="center">出售人电话· : {{goodsPhone}}</p>
+                            <p align="center">商品分类 : {{gCategory}}</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">确认</button>
+                        </div>
+                    </div><!-- /.modal-content -->
+                </div><!-- /.modal-dialog -->
+            </div><!-- /.modal -->
+
+            <!--显示个人信息-->
+            <div class="modal" id="myModal">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title" >个人信息查看</h4>
+                            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <p align="center">用户名 : {{myUser}}</p>
+                            <p align="center">密码 : {{userPass}}</p>
+                            <p align="center">性别 : {{sex}}</p>
+                            <p align="center">电话 : {{myUser}}</p>
+                            <p align="center">权限 : {{uid}}</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                            <button type="button" class="btn btn-primary" @click="updateMy()">修改</button>
+                        </div>
+                    </div><!-- /.modal-content -->
+                </div><!-- /.modal-dialog -->
+            </div><!-- /.modal -->
+
+            <!--修改个人信息-->
+            <div class="modal" id="updateModal">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title" >个人信息修改</h4>
+                            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <el-form  :model="myFormData" :rules="rules" label-position="right" label-width="100px">
+
+                                <el-form-item label="用户名" prop="userUser">
+                                    <el-input v-model="myFormData.userUser"></el-input>
+                                </el-form-item>
+                                <el-form-item label="密码" prop="userPass">
+                                    <el-input v-model="myFormData.userPass"></el-input>
+                                </el-form-item>
+                                <el-form-item label="性别" prop="sex">
+                                    <el-select v-model="myFormData.sex" placeholder="请选择用户性别">
+                                        <el-option label="男" value="男"></el-option>
+                                        <el-option label="女" value="女"></el-option>
+                                    </el-select>
+                                </el-form-item>
+                                <el-form-item label="电话" prop="userPhone">
+                                    <el-input v-model="myFormData.userPhone"></el-input>
+                                </el-form-item>
+
+                            </el-form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                            <button type="button" class="btn btn-primary" @click="handleMyEdit()">修改</button>
+                        </div>
+                    </div><!-- /.modal-content -->
+                </div><!-- /.modal-dialog -->
+            </div><!-- /.modal -->
+
+    </el-container>
+</div>
+<script src="../../js/vue.js"></script>
+<script src="../../element-ui/lib/index.js"></script>
+<link rel="stylesheet" href="../../element-ui/lib/theme-chalk/index.css"/>
+<link rel="stylesheet" href="../../css/bootstrap.min.css" />
+<script src="../../js/axios-0.18.0.js"></script>
+<script src="../../js/jquery-3.2.1.min.js"></script>
+<script src="../../js/bootstrap.min.js"></script>
+
+
+<script>
+    new Vue({
+        el: "#admin",
+        data:{
+            //个人信息栏
+            myUser: '',
+            userPass: '',
+            sex: '',
+            UserPhone: '',
+            uid: '',
+
+            //详情页信息
+            goodsName: '',
+            goodsPrice: '',
+            goodsPic: '',
+            goodsDesc: '',
+            goodsAddress: '',
+            goodsPhone: '',
+            gCategory: '',
+            autoStatus: '',
+
+
+            myFormData: {},//我的数据列表
+
+            //查询
+            selectName: '',
+            selectDesc: '',
+            selectPrice: '',
+
+
+            dataList: [],//当前页要展示的列表数据
+
+            goodsList: {},
+
+
+            formData: {},//表单数据
+            rules: {//校验规则
+                userUser: [{ required: true, message: '用户名为必填项', trigger: 'blur' }],
+                userPass: [{ required: true, message: '用户密码为必填项', trigger: 'blur' }]
+            }
+        },
+
+        //钩子函数，VUE对象初始化完成后自动执行
+        created() {
+            this.getAll();
+            // $("#myModal").modal("hide");
+        },
+
+        methods: {
+            //列表
+            getAll() {
+                //发送ajax请求
+                axios.get("/Goods/getAll").then((res)=>{
+                    this.dataList = res.data.data;
+                });
+            },
+            //模糊查询
+            getByLike() {
+                axios({
+                    method: 'post',
+                    url: '/Goods/getByLike',
+                    data: {
+                        goodsName: this.selectName,
+                        goodsDesc: this.selectDesc,
+                    }
+                }).then(res=>{
+                    <!--只能查询一次-->
+                    console.log(res);
+                    if(res.data.code==1){
+                        this.dataList=res.data.data;
+                        //重置输入框
+                        this.resetSelectName();
+                        this.resetSelectDesc();
+                    }else{
+                        this.$message(res.data.msg);
+                    }
+                })
+            },
+            //查询价格大的
+            getUp() {
+                axios({
+                    method: 'post',
+                    url: '/Goods/getUp',
+                    data: {
+                        goodsPrice: this.selectPrice,
+                    }
+                }).then(res=>{
+                    <!--只能查询一次-->
+                    console.log(res);
+                    this.dataList=res.data.data;
+                    //重置输入框
+                    this.resetSelectPrice();
+                    this.$message(res.data.msg);
+                })
+            },
+            //查询价格小的
+            getDown() {
+                axios({
+                    method: 'post',
+                    url: '/Goods/getDown',
+                    data: {
+                        goodsPrice: this.selectPrice,
+                    }
+                }).then(res=>{
+                    <!--只能查询一次-->
+                    console.log(res);
+                    this.dataList=res.data.data;
+                    //重置输入框
+                    this.resetSelectPrice();
+                    this.$message(res.data.msg);
+                })
+            },
+            aaa(){
+                //测试方法
+                this.$message("我是测试方法");
+            },
+            getSCategory(SCategory) {
+                axios.get("/Goods/getSCategory/"+SCategory).then((res)=>{
+                    this.dataList = res.data.data;
+                });
+            },
+
+            //点击衣物
+            getOne() {
+                axios.get("/Goods/getOne").then((res)=>{
+                    this.dataList = res.data.data;
+                });
+            },
+            //点击文具
+            getTwo() {
+                axios.get("/Goods/getTwo").then((res)=>{
+                    this.dataList = res.data.data;
+                });
+            },
+            //点击书籍
+            getThree() {
+                axios.get("/Goods/getThree").then((res)=>{
+                    this.dataList = res.data.data;
+                });
+            },
+            //点击日用品
+            getFour() {
+                axios.get("/Goods/getFour").then((res)=>{
+                    this.dataList = res.data.data;
+                });
+            },
+            //点击杂物
+            getFive() {
+                axios.get("/Goods/getFive").then((res)=>{
+                    this.dataList = res.data.data;
+                });
+            },
+            //重置表单
+            resetSelectName(){
+                this.selectName='';
+            },
+            resetSelectDesc(){
+                this.selectDesc='';
+            },
+            resetSelectPrice(){
+                this.selectPrice='';
+            },
+
+            //登录人员信息列表
+            getMy(){
+                // $.modal.open("查看用户信息","/User/getMy");
+                axios.get("/User/getMy").then((res)=>{
+                    // this.dataList = res.data.data;
+                    console.log(res);
+                    this.myUser=res.data.data.userUser;
+                    this.userPass=res.data.data.userPass;
+                    this.sex=res.data.data.sex;
+                    this.userPhone=res.data.data.userPhone;
+                    this.uid=res.data.data.uid;
+                });
+
+                $("#myModal").modal("show");
+            },
+            //详情窗口
+            select(row) {
+                axios.get("/Goods/getById/"+row.id).then((res)=>{
+                    console.log(res);
+                    this.goodsName=res.data.data.goodsName;
+                    this.goodsPrice=res.data.data.goodsPrice;
+                    this.goodsPic=res.data.data.goodsPic;
+                    this.goodsDesc=res.data.data.goodsDesc;
+                    this.goodsAddress=res.data.data.goodsAddress;
+                    this.goodsPhone=res.data.data.goodsPhone;
+                    this.gCategory=res.data.data.gCategory;
+                    this.autoStatus=res.data.data.autoStatus;
+                });
+
+                $("#goodsModal").modal("show");
+            },
+            up(row) {
+                //弹出提示框
+                this.$confirm("此操作将把当前数据加入购物车，是否继续？","提示",{
+                    type:'info'
+                }).then(()=>{
+                    //2.做查询业务
+                    axios.get("/Goods/getById/"+row.id).then((res)=>{
+                        if (res.data.code == 1) {
+                            console.log(res.data.data);
+                            //进行添加操作，添加到shopping表
+
+                            axios({
+                                method: 'post',
+                                url: '/Shopping/add',
+                                data: {
+                                    shoppingName: res.data.data.goodsName,
+                                    shoppingPrice: res.data.data.goodsPrice,
+                                    shoppingPic: res.data.data.goodsPic,
+                                    shoppingDesc: res.data.data.goodsDesc,
+                                    shoppingAddress: res.data.data.goodsAddress,
+                                    shoppingPhone: res.data.data.goodsPhone,
+                                    shoppingId: res.data.data.gid
+                                }
+                            }).then(res=>{
+                                this.$message(res.data.msg);
+                            })
+                        } else {
+                            this.$message.error("提交失败");
+                        }
+                    }).finally(()=>{
+                        this.getAll();
+                    });
+                }).catch(()=>{
+                    //3.取消删除
+                    this.$message.info("取消提交操作");
+                });
+            },
+            toMyThing(){
+                window.location.href="../userPage/myThings.html";
+                //axios.get("/User/toMythings")
+            },
+            toMyShopping(){
+                //axios.get("/User/toShopping")
+                window.location.href="../userPage/shopping.html";
+            },
+            toMyHistory(){
+                //axios.get("/User/toHistory")
+                window.location.href="../userPage/history.html";
+            }
+        }
+    })
+</script>
+</body>
+</html>

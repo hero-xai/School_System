@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>我的货架</title>
+
+    <style>
+        .el-header, .el-footer {
+            background-color: #B3C0D1;
+            color: #333;
+            text-align: center;
+            line-height: 60px;
+        }
+
+        .el-aside {
+            background-color: #D3DCE6;
+            color: #333;
+            text-align: center;
+            line-height: 200px;
+        }
+
+        .el-main {
+            background-color: #E9EEF3;
+            color: #333;
+            text-align: center;
+            line-height: 160px;
+        }
+
+        body > .el-container {
+            margin-bottom: 40px;
+        }
+
+        .el-container:nth-child(5) .el-aside,
+        .el-container:nth-child(6) .el-aside {
+            line-height: 260px;
+        }
+
+        .el-container:nth-child(7) .el-aside {
+            line-height: 320px;
+        }
+
+    </style>
+</head>
+<body>
+<div id="myThings">
+    <el-container>
+        <el-header>
+            <el-button type="primary" icon="el-icon-s-home" @click="myMain()">主页</el-button>
+            <el-button type="primary" icon="el-icon-switch-button" @click="logout()">退出</el-button>
+        </el-header>
+
+    <el-main>
+    <template>
+
+        <el-table size="small" current-row-key="id" :data="dataList" stripe highlight-current-row>
+            <el-table-column prop="mythingsName" align="center" label="商品名称"></el-table-column>
+            <el-table-column prop="mythingsPrice" align="center" label="商品价格"></el-table-column>
+            <el-table-column prop="mythingsPic" label="商品图片" align="center">
+                <template slot-scope="scope">
+                    <img :src="scope.row.mythingsPic" width="40" height="40"/>
+                </template>
+            </el-table-column>
+            <el-table-column prop="mythingsDesc" label="商品信息简介" align="center"></el-table-column>
+            <el-table-column label="上架状态">
+                <template slot-scope="scope">
+                    <el-switch
+                            v-model="scope.row.mythingsStatus"
+                            active-color="#13ce66"
+                            inactive-color="#ff4949"
+                            active-value="1"
+                            inactive-value="0"
+                            @change="getStatus(scope.row)">
+                    </el-switch>
+                </template>
+            </el-table-column>
+            <el-table-column label="操作" align="center">
+                <template slot-scope="scope">
+                        <el-button type="primary" size="mini" @click="handleUpdate(scope.row)">修改</el-button>
+                        <el-button type="danger" size="mini" @click="handleDelete(scope.row)">删除</el-button>
+                </template>
+            </el-table-column>
+
+        </el-table>
+        <el-button type="primary" round @click="handleCreate()">新增商品</el-button>
+        </template>
+    </el-main>
+    </el-container>
+
+    <!--新增商品信息-->
+    <div class="modal" id="addModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" >新增商品信息</h4>
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                </div>
+                <div class="modal-body">
+                    <el-form  :model="myFormData" :rules="rules" label-position="right" label-width="100px">
+
+                        <el-form-item label="商品名称" prop="mythingsName">
+                            <el-input v-model="mythingsName"></el-input>
+                        </el-form-item>
+                        <el-form-item label="商品价格" prop="mythingsPrice">
+                            <el-input v-model="mythingsPrice"></el-input>
+                        </el-form-item>
+                        <el-form-item label="商品图片" prop="mythingsPic">
+                            <!--<el-input v-model="myFormData.mythingsPic"></el-input>-->
+                            <el-upload
+                                    class="upload-demo"
+                                    action="/common/upload"
+                                    multiple
+                                    :limit="3">
+                                <el-button size="small" type="primary">点击上传</el-button>
+                                <div slot="tip" class="el-upload__tip">只能上传jpg/png文件</div>
+                            </el-upload>
+                        </el-form-item>
+                        <el-form-item label="商品描述" prop="mythingsDesc">
+                            <el-input v-model="mythingsDesc"></el-input>
+                        </el-form-item>
+                        <el-form-item label="交易地址" prop="mythingsAddress">
+                            <el-input v-model="mythingsAddress"></el-input>
+                        </el-form-item>
+                        <el-form-item label="物品种类" prop="category">
+                            <el-select v-model="category" placeholder="请选择商品种类">
+                                <el-option label="衣物" value="衣物"></el-option>
+                                <el-option label="文具" value="文具"></el-option>
+                                <el-option label="书籍" value="书籍"></el-option>
+                                <el-option label="日用品" value="日用品"></el-option>
+                                <el-option label="杂物" value="杂物"></el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" @click="add()">新增</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+    <!--修改商品信息-->
+    <div class="modal" id="updateModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" >商品信息修改</h4>
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                </div>
+                <div class="modal-body">
+                    <el-form  :model="updateData" :rules="rules" label-position="right" label-width="100px">
+
+                        <el-form-item label="商品名称" prop="mythingsName">
+                            <el-input v-model="updateData.mythingsName"></el-input>
+                        </el-form-item>
+                        <el-form-item label="商品价格" prop="mythingsPrice">
+                            <el-input v-model="updateData.mythingsPrice"></el-input>
+                        </el-form-item>
+                        <el-form-item label="商品描述" prop="mythingsDesc">
+                            <el-input v-model="updateData.mythingsDesc"></el-input>
+                        </el-form-item>
+                        <el-form-item label="交易地址" prop="mythingsAddress">
+                            <el-input v-model="updateData.mythingsAddress"></el-input>
+                        </el-form-item>
+                        <el-form-item label="物品种类" prop="category">
+                            <el-select v-model="updateData.category" placeholder="请选择商品种类">
+                                <el-option label="衣物" value="衣物"></el-option>
+                                <el-option label="文具" value="文具"></el-option>
+                                <el-option label="书籍" value="书籍"></el-option>
+                                <el-option label="日用品" value="日用品"></el-option>
+                                <el-option label="杂物" value="杂物"></el-option>
+                            </el-select>
+                        </el-form-item>
+
+                    </el-form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" @click="handleMyEdit()">修改</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+</div>
+
+<script src="../../js/vue.js"></script>
+<script src="../../element-ui/lib/index.js"></script>
+<link rel="stylesheet" href="../../element-ui/lib/theme-chalk/index.css"/>
+<link rel="stylesheet" href="../../css/bootstrap.min.css" />
+<script src="../../js/axios-0.18.0.js"></script>
+<script src="../../js/jquery-3.2.1.min.js"></script>
+<script src="../../js/bootstrap.min.js"></script>
+
+
+
+<script>
+    new Vue({
+        el: "#myThings",
+        data:{
+            dataList: {
+                mythingsName: '',
+                mythingsPrice: '',
+                mythingsPic: '',
+                mythingsDesc: ''
+            },
+            //myFormData: {},新增数据
+            mythingsName: '',
+            mythingsPrice: '',
+            mythingsPic: '',
+            mythingsDesc: '',
+            mythingsAddress: '',
+            category: '',
+
+
+            updateData: {},
+            mythingsStatus: '',
+            fileList: []
+        },
+        created() {
+            this.getAll();
+        },
+
+        methods:{
+            getAll(){
+                axios.get("/Mythings/getAll").then(res=>{
+                    console.log(res);
+                    this.dataList=res.data.data;
+                })
+            },
+            myMain(){
+                window.location.href="../myPage/userMain.html";
+            },
+            logout(){
+                //弹出提示框
+                this.$confirm("此操作退出登录，是否继续？","提示",{
+                    type:'info'
+                }).then(()=>{
+                    //2.做删除业务
+                    axios.post("/User/logout").then((res)=>{
+                        if(res.data.code==1){
+                            window.location.href="../login/login.html";
+                            this.$message(res.data.msg);
+                        }
+                        else{
+                            this.$message("退出失败");
+                        }
+                    })
+                }).catch(()=>{
+                    //3.取消删除
+                    this.$message.info("取消退出");
+                });
+            },
+            //新增信息
+                handleCreate(){
+                 //显示页面
+                 $("#addModal").modal("show");
+                },
+                resetMyFormData(){
+                 this.myFormData='';
+                },
+                add(){
+                    axios.get("/common/getURL").then(res=>{
+                        console.log(res.data);
+                        this.mythingsPic="/phone/"+res.data;
+                        console.log(this.mythingsPic);
+                        this.addNext();
+                    });
+
+
+                    // axios.post("/Mythings/add",this.myFormData).then(res=>{
+                    //     console.log(res);
+                    //     if(res.data.code==1){
+                    //         this.$message(res.data.msg);
+                    //         $("#addModal").modal("hide");
+                    //         this.resetMyFormData();
+                    //         this.getAll();
+                    //     }else{
+                    //         this.$message("新增失败,请重试");
+                    //     }
+                    // });
+                },
+            addNext(){
+                axios({
+                    method: 'post',
+                    url: '/Mythings/add',
+                    data: {
+                        mythingsName: this.mythingsName,
+                        mythingsPrice: this.mythingsPrice,
+                        mythingsPic: this.mythingsPic,
+                        mythingsDesc: this.mythingsDesc,
+                        mythingsAddress: this.mythingsAddress,
+                        category: this.category
+                    }
+                }).then(res=>{
+                    console.log(res);
+                    if(res.data.code==1){
+                        this.$message(res.data.msg);
+                        $("#addModal").modal("hide");
+                        this.resetMyFormData();
+                        this.getAll();
+                    }else{
+                        this.$message("新增失败,请重试");
+                    }
+                })
+            }
+            ,
+            //修改信息
+            handleUpdate(row){
+                //显示信息列表
+                axios.get("/Mythings/getById/"+row.id).then(res=>{
+                    this.updateData=res.data.data;
+                })
+                $("#updateModal").modal("show");
+            },
+            //开始修改
+            handleMyEdit(){
+                axios.put("/Mythings/update",this.updateData).then(res=>{
+                    console.log(res);
+                    if(res.data.code==1){
+                        this.$message(res.data.msg);
+                        $("#updateModal").modal("hide");
+                        this.getAll();
+                    }else{
+                        this.$message("修改失败,请重试");
+                    }
+                });
+            },
+            // 删除
+            handleDelete(row) {
+                //1.弹出提示框
+                this.$confirm("此操作永久删除当前数据，是否继续？","提示",{
+                    type:'info'
+                }).then(()=>{
+                    //2.做删除业务
+                    axios.delete("/Mythings/delete/"+row.id).then((res)=>{
+                        if(res.data.code == 1){
+                            this.$message.success("删除成功");
+                        }else{
+                            this.$message.error("删除失败");
+                        }
+                    }).finally(()=>{
+                        this.getAll();
+                    });
+                }).catch(()=>{
+                    //3.取消删除
+                    this.$message.info("取消删除操作");
+                });
+            },
+            //改变审核状态
+            getStatus(row){
+                axios.put("/Mythings/getStatus/"+row.id).then((res)=>{
+                    //this.dataList = res.data.data;
+                    this.mythingsStatus=res.data.data.mythingsStatus;
+                    this.$message(res.data.msg);
+                });
+            },
+            //获取图片地址
+            upload(){
+                axios.get("/common/getURL").then(res=>{
+                    console.log(res);
+                })
+            }
+
+        }
+    })
+</script>
+</body>
+</html>

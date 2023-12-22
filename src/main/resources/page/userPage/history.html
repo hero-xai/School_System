@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>历史订单页面</title>
+
+    <style>
+        .el-header, .el-footer {
+            background-color: #B3C0D1;
+            color: #333;
+            text-align: center;
+            line-height: 60px;
+        }
+
+        .el-aside {
+            background-color: #D3DCE6;
+            color: #333;
+            text-align: center;
+            line-height: 200px;
+        }
+
+        .el-main {
+            background-color: #E9EEF3;
+            color: #333;
+            text-align: center;
+            line-height: 160px;
+        }
+
+        body > .el-container {
+            margin-bottom: 40px;
+        }
+
+        .el-container:nth-child(5) .el-aside,
+        .el-container:nth-child(6) .el-aside {
+            line-height: 260px;
+        }
+
+        .el-container:nth-child(7) .el-aside {
+            line-height: 320px;
+        }
+
+    </style>
+</head>
+<body>
+<div id="history">
+    <el-container>
+        <el-header>
+            <el-button type="primary" icon="el-icon-s-home" @click="myMain()">主页</el-button>
+            <el-button type="primary" icon="el-icon-switch-button" @click="logout()">退出</el-button>
+        </el-header>
+
+        <el-main>
+    <template>
+        <el-table
+                :data="tableData"
+                align="center">
+            <el-table-column
+                    prop="historyName"
+                    label="商品名称"
+                  >
+            </el-table-column>
+            <el-table-column
+                    prop="historyPrice"
+                    label="商品价格"
+                    >
+            </el-table-column>
+            <el-table-column prop="historyPic" label="商品图片" align="center">
+                <template slot-scope="scope">
+                    <img :src="scope.row.historyPic" width="40" height="40"/>
+                </template>
+            </el-table-column>
+            <el-table-column
+                    prop="historyDesc"
+                    label="商品描述"
+                    >
+            </el-table-column>
+        </el-table>
+    </template>
+        </el-main>
+    </el-container>
+</div>
+
+<script src="../../js/vue.js"></script>
+<script src="../../element-ui/lib/index.js"></script>
+<link rel="stylesheet" href="../../element-ui/lib/theme-chalk/index.css"/>
+<link rel="stylesheet" href="../../css/bootstrap.min.css" />
+<script src="../../js/axios-0.18.0.js"></script>
+<script src="../../js/jquery-3.2.1.min.js"></script>
+<script src="../../js/bootstrap.min.js"></script>
+
+
+<script>
+    new Vue({
+        el: "#history",
+        data: {
+            tableData: {
+                historyName: '',
+                historyDesc: '',
+                historyPrice: '',
+                historyPic: ''
+            }
+
+        },
+        created() {
+            this.getAll();
+        },
+        methods:{
+            getAll(){
+                axios.get("/History/getAll").then(res=>{
+                    console.log(res);
+                    this.tableData=res.data.data;
+                })
+            },
+            myMain(){
+                window.location.href="../myPage/userMain.html";
+            },
+            logout(){
+                //弹出提示框
+                this.$confirm("此操作退出登录，是否继续？","提示",{
+                    type:'info'
+                }).then(()=>{
+                    //2.做删除业务
+                    axios.post("/User/logout").then((res)=>{
+                        if(res.data.code==1){
+                            window.location.href="../login/login.html";
+                            this.$message(res.data.msg);
+                        }
+                        else{
+                            this.$message("退出失败");
+                        }
+                    })
+                }).catch(()=>{
+                    //3.取消删除
+                    this.$message.info("取消退出");
+                });
+            },
+
+        }
+    })
+</script>
+</body>
+</html>

@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:font-family="微软雅黑">
+<head>
+    <meta charset="UTF-8">
+    <title>购物车页面</title>
+
+    <style>
+        .demo-table-expand {
+            font-size: 0;
+        }
+        .demo-table-expand label {
+            width: 90px;
+            color: #99a9bf;
+        }
+        .demo-table-expand .el-form-item {
+            margin-right: 0;
+            margin-bottom: 0;
+            width: 50%;
+        }
+
+
+        .el-header, .el-footer {
+            background-color: #B3C0D1;
+            color: #333;
+            text-align: center;
+            line-height: 60px;
+        }
+
+        .el-aside {
+            background-color: #D3DCE6;
+            color: #333;
+            text-align: center;
+            line-height: 200px;
+        }
+
+        .el-main {
+            background-color: #E9EEF3;
+            color: #333;
+            text-align: center;
+            line-height: 160px;
+        }
+
+        body > .el-container {
+            margin-bottom: 40px;
+        }
+
+        .el-container:nth-child(5) .el-aside,
+        .el-container:nth-child(6) .el-aside {
+            line-height: 260px;
+        }
+
+        .el-container:nth-child(7) .el-aside {
+            line-height: 320px;
+        }
+    </style>
+</head>
+<body>
+<div id="shopping">
+    <el-container>
+        <el-header>
+            <el-button type="primary" icon="el-icon-s-home" @click="myMain()">主页</el-button>
+            <el-button type="primary" icon="el-icon-switch-button" @click="logout()">退出</el-button>
+        </el-header>
+
+        <el-main>
+            <template>
+                <el-table
+                        :data="tableData"
+                        style="width: 100%">
+                    <el-table-column
+                            label="商品名称"
+                            align="center">
+                        <template slot-scope="scope">
+                            <el-popover trigger="hover" placement="top">
+                                <p>商品名称: {{ scope.row.shoppingName }}</p>
+                                <p>商品描述: {{ scope.row.shoppingDesc }}</p>
+                                <div slot="reference" class="name-wrapper">
+                                    <el-tag size="medium">{{ scope.row.shoppingName }}</el-tag>
+                                </div>
+                            </el-popover>
+                        </template>
+                    </el-table-column>
+                    <el-table-column
+                            label="商品价格"
+                            align="center">
+                        <template slot-scope="scope">
+                            <span style="margin-left: 30px">{{ scope.row.shoppingPrice }}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column label="操作" align="center">
+                        <template slot-scope="scope">
+                            <el-button
+                                    size="mini"
+                                    type="primary"
+                                    @click="getPic(scope.row)">图片</el-button>
+                            <el-button
+                                    size="mini"
+                                    type="danger"
+                                    @click="handleDelete(scope.row)">移除</el-button>
+                            <el-button
+                                    size="mini"
+                                    type="success"
+                                    @click="handlePurchase(scope.row)">确认购买</el-button>
+                        </template>
+                    </el-table-column>
+                </el-table>
+            </template>
+
+
+
+        <!--显示商品图片-->
+        <div class="modal" id="picModal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" >商品图片查看</h4>
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    </div>
+                    <div class="modal-body">
+                        <p align="center">商品图片</p>
+                        <p align="center">
+                        <div class="demo-image" align="center">
+                            <el-image
+                                    style="width: 400px; height: 400px"
+                                    :src="shoppingPic">
+                            </el-image>
+                        </div>
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">确认</button>
+                    </div>
+                </div><!-- /.modal-content -->
+            </div><!-- /.modal-dialog -->
+        </div><!-- /.modal -->
+
+            <!--显示售卖人信息-->
+            <div class="modal" id="purchaseModal">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title" >卖家信息查看</h4>
+                            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <p align="center">商品ID：{{id}}</p>
+                            <p align="center">卖家地址：{{shoppingAddress}}</p>
+                            <p align="center">卖家联系方式：{{shoppingPhone}}</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                            <button type="button" class="btn btn-primary" @click="purchased()">完成购买</button>
+                        </div>
+                    </div><!-- /.modal-content -->
+                </div><!-- /.modal-dialog -->
+            </div><!-- /.modal -->
+
+        </el-main>
+    </el-container>
+</div>
+
+<script src="../../js/vue.js"></script>
+<script src="../../element-ui/lib/index.js"></script>
+<link rel="stylesheet" href="../../element-ui/lib/theme-chalk/index.css"/>
+<link rel="stylesheet" href="../../css/bootstrap.min.css" />
+<script src="../../js/axios-0.18.0.js"></script>
+<script src="../../js/jquery-3.2.1.min.js"></script>
+<script src="../../js/bootstrap.min.js"></script>
+
+
+<script>
+    new Vue({
+        el: "#shopping",
+        data:{
+            tableData: {
+                shoppingName: '',
+                shoppingDesc: '',
+                shoppingPrice: '',
+                shoppingId: ''
+            },
+            id: '',
+            shoppingPic: '',
+            shoppingAddress: '',
+            shoppingPhone: ''
+
+        },
+        created() {
+            this.getAll();
+        },
+        methods:{
+
+            getAll(){
+                axios.get("/Shopping/getAll").then(res=>{
+                    this.tableData=res.data.data;
+                })
+            },
+           getPic(row) {
+               console.log(row);
+               axios.get("/Shopping/getById/"+row.id).then(res=>{
+                   console.log(res);
+                   this.shoppingPic=res.data.data.shoppingPic;
+               });
+
+               $("#picModal").modal("show");
+            },
+            handleDelete(row) {
+                console.log(row);
+                //1.弹出提示框
+                this.$confirm("此操作永久删除当前数据，是否继续？","提示",{
+                    type:'info'
+                }).then(()=>{
+                    //2.做删除业务
+                    axios.delete("/Shopping/delete/"+row.id).then((res)=>{
+                        if(res.data.code == 1){
+                            this.$message.success("删除成功");
+                        }else{
+                            this.$message.error("删除失败");
+                        }
+                    }).finally(()=>{
+                        this.getAll();
+                    });
+                }).catch(()=>{
+                    //3.取消删除
+                    this.$message.info("取消删除操作");
+                });
+            },
+            handlePurchase(row) {
+                console.log(row);
+               //弹出售卖人信息栏
+                console.log(row);
+                axios.get("/Shopping/getById/"+row.id).then(res=>{
+                    console.log(res);
+                    this.id=res.data.data.id;
+                    this.shoppingAddress=res.data.data.shoppingAddress;
+                    this.shoppingPhone=res.data.data.shoppingPhone;
+                });
+
+                $("#purchaseModal").modal("show");
+
+            },
+            purchased() {
+                //弹出提示框
+                this.$confirm("此操作将提交为历史记录，是否继续？","提示",{
+                    type:'info'
+                }).then(()=>{
+                    //2.做删除业务
+                    axios.delete("/Shopping/remove/"+this.id).then((res)=>{
+                        if (res.data.code == 1) {
+                            console.log(res.data.data);
+                            //进行添加操作，添加到History表
+
+                            axios({
+                                method: 'post',
+                                url: '/History/add',
+                                data: {
+                                    historyName: res.data.data.shoppingName,
+                                    historyPrice: res.data.data.shoppingPrice,
+                                    historyPic: res.data.data.shoppingPic,
+                                    historyDesc: res.data.data.shoppingDesc,
+                                    historyAddress: res.data.data.shoppingAddress,
+                                    historyPhone: res.data.data.shoppingPhone,
+                                    hid: res.data.data.shoppingId
+                                }
+                            }).then(res=>{
+                                this.$message("添加历史记录成功");
+                                $("#purchaseModal").modal("hide");
+                            })
+                        } else {
+                            this.$message.error("添加历史记录失败失败");
+                        }
+                    }).finally(()=>{
+                        this.getAll();
+                    });
+                }).catch(()=>{
+                    //3.取消删除
+                    this.$message.info("取消购买操作");
+                });
+            },
+            myMain(){
+                window.location.href="../myPage/userMain.html";
+            },
+            logout(){
+                //弹出提示框
+                this.$confirm("此操作退出登录，是否继续？","提示",{
+                    type:'info'
+                }).then(()=>{
+                    //2.做删除业务
+                    axios.post("/User/logout").then((res)=>{
+                        if(res.data.code==1){
+                            window.location.href="../login/login.html";
+                            this.$message(res.data.msg);
+                        }
+                        else{
+                            this.$message("退出失败");
+                        }
+                    })
+                }).catch(()=>{
+                    //3.取消删除
+                    this.$message.info("取消退出");
+                });
+            },
+        }
+    })
+</script>
+</body>
+</html>

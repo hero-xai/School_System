@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>审核员页面</title>
+
+    <style>
+        .el-header {
+            background-color: #B3C0D1;
+            color: #333;
+            line-height: 60px;
+        }
+
+        .el-aside {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+<div id="admin">
+    <el-container style="height: 500px; border: 1px solid #eee">
+        <el-aside width="200px" style="background-color: rgb(238, 241, 246)">
+            <el-menu :default-openeds="['1', '3']">
+                <el-submenu index="1">
+                    <template slot="title"><i class="el-icon-menu"></i>商品一览</template>
+                    <el-menu-item-group>
+                        <el-menu-item index="1-1" @click="getAll()">全部商品</el-menu-item>
+                    </el-menu-item-group>
+                </el-submenu>
+                <el-submenu index="2">
+                    <template slot="title"><i class="el-icon-message"></i>商品管理</template>
+                    <el-menu-item-group>
+                        <el-menu-item index="2-1" @click="getOne()">衣物</el-menu-item>
+                        <el-menu-item index="2-2" @click="getTwo()">文具</el-menu-item>
+                        <el-menu-item index="2-3" @click="getThree()">书籍</el-menu-item>
+                        <el-menu-item index="2-4" @click="getFour()">日用品</el-menu-item>
+                        <el-menu-item index="2-5" @click="getFive()">杂物</el-menu-item>
+                    </el-menu-item-group>
+                </el-submenu>
+
+            </el-menu>
+        </el-aside>
+
+        <el-container >
+            <el-header style="text-align: right; font-size: 12px">
+                <el-dropdown >
+                    <i class="el-icon-setting" style="margin-right: 15px"></i>
+                    <el-dropdown-menu slot="dropdown">
+                        <el-dropdown-item @click.native="getMy()">查看个人信息</el-dropdown-item>
+                        <!--审核信息记录表？-->
+                        <el-dropdown-item @click.native="getMyGoods()">审核信息显示</el-dropdown-item>
+                        <el-dropdown-item @click.native="logout()">退出登录</el-dropdown-item>
+                    </el-dropdown-menu>
+                </el-dropdown>
+                <span>审核员</span>
+            </el-header>
+
+            <!--主模块显示数据-->
+            <el-main>
+                <!--只需要关注商品名进行审核-->
+                <el-input placeholder="商品名称" v-model="selectName" style="width: 200px;" class="filter-item"></el-input>
+                <el-input placeholder="商品简介" v-model="selectDesc" style="width: 200px;" class="filter-item"></el-input>
+                <el-button type="primary" round @click="getByLike" >查询用户</el-button>
+
+                <el-table size="small" current-row-key="id" :data="dataList" stripe highlight-current-row>
+                    <el-table-column prop="id" align="center" label="商品ID"></el-table-column>
+                    <el-table-column prop="shopsName" align="center" label="商品名称"></el-table-column>
+                    <el-table-column prop="shopsPic" label="商品图片" align="center" >
+                        <template slot-scope="scope">
+                            <img :src="scope.row.shopsPic" width="40" height="40"/>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="shopsDesc" label="商品信息简介" align="center"></el-table-column>
+                    <el-table-column label="审核状态">
+                        <template slot-scope="scope">
+                            <el-switch
+                                    v-model="scope.row.autoStatus"
+                                    active-color="#13ce66"
+                                    inactive-color="#ff4949"
+                                    active-value="1"
+                                    inactive-value="0"
+                            @change="getStatus(scope.row)">
+                            </el-switch>
+                        </template>
+                    </el-table-column>
+                    <el-table-column label="操作" align="center">
+                        <template slot-scope="scope">
+                            <el-button type="primary" size="mini" @click="select(scope.row)">详情</el-button>
+                            <el-button type="primary" size="mini" @click="up(scope.row)">提交</el-button>
+                        </template>
+                    </el-table-column>
+
+                </el-table>
+            </el-main>
+    <!--显示商品详情-->
+                <div class="modal" id="shopsModal">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h4 class="modal-title" >商品详情查看</h4>
+                                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                            </div>
+                            <div class="modal-body">
+                                <p align="center">商品名称 : {{shopsName}}</p>
+                                <p align="center">商品价格 : {{shopsPrice}}</p>
+                                <p align="center">商品图片 : <!--{{shopsPic}}-->
+                                <div class="demo-image" align="center">
+                                    <el-image
+                                            style="width: 200px; height: 200px"
+                                            :src="shopsPic">
+                                    </el-image>
+                                </div>
+                                </p>
+                                <p align="center">商品描述 : {{shopsDesc}}</p>
+                                <p align="center">商品地址 : {{shopsAddress}}</p>
+                                <p align="center">出售人电话· : {{shopsPhone}}</p>
+                                <p align="center">商品分类 : {{sCategory}}</p>
+                                <p align="center">商品状态 : {{autoStatus}}</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">确认</button>
+                            </div>
+                        </div><!-- /.modal-content -->
+                    </div><!-- /.modal-dialog -->
+                </div><!-- /.modal -->
+
+    <!--显示个人信息-->
+    <div class="modal" id="myModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" >个人信息查看</h4>
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                </div>
+                <div class="modal-body">
+                    <p align="center">用户名 : {{myUser}}</p>
+                    <p align="center">密码 : {{userPass}}</p>
+                    <p align="center">性别 : {{sex}}</p>
+                    <p align="center">电话 : {{myUser}}</p>
+                    <p align="center">权限 : {{uid}}</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" @click="updateMy()">修改</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+    <!--修改个人信息-->
+    <div class="modal" id="updateModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" >个人信息修改</h4>
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                </div>
+                <div class="modal-body">
+                    <el-form  :model="myFormData" :rules="rules" label-position="right" label-width="100px">
+
+                        <el-form-item label="用户名" prop="userUser">
+                            <el-input v-model="myFormData.userUser"></el-input>
+                        </el-form-item>
+                        <el-form-item label="密码" prop="userPass">
+                            <el-input v-model="myFormData.userPass"></el-input>
+                        </el-form-item>
+                        <el-form-item label="性别" prop="sex">
+                            <el-select v-model="myFormData.sex" placeholder="请选择用户性别">
+                                <el-option label="男" value="男"></el-option>
+                                <el-option label="女" value="女"></el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="电话" prop="userPhone">
+                            <el-input v-model="myFormData.userPhone"></el-input>
+                        </el-form-item>
+
+                    </el-form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" @click="handleMyEdit()">修改</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+            <!--显示个人审核信息goods表-->
+            <div class="modal" id="myGoodsModal">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title" >个人审核信息查看</h4>
+                            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <el-table size="small" current-row-key="id" :data="goodsList" stripe highlight-current-row>
+                                <el-table-column prop="id" align="center" label="商品ID"></el-table-column>
+                                <el-table-column prop="goodsName" align="center" label="商品名称"></el-table-column>
+                                <el-table-column prop="goodsPic" label="商品图片" align="center">
+                                    <template slot-scope="scope">
+                                        <img :src="scope.row.goodsPic" width="40" height="40"/>
+                                    </template>
+                                </el-table-column>
+                                <el-table-column prop="goodsDesc" label="商品信息简介" align="center"></el-table-column>
+                                <el-table-column prop="autoStatus" label="审核结果" align="center"></el-table-column>
+                            </el-table>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">确认</button>
+                        </div>
+                    </div><!-- /.modal-content -->
+                </div><!-- /.modal-dialog -->
+            </div><!-- /.modal -->
+
+
+</div>
+<script src="../../js/vue.js"></script>
+<script src="../../element-ui/lib/index.js"></script>
+<link rel="stylesheet" href="../../element-ui/lib/theme-chalk/index.css"/>
+<link rel="stylesheet" href="../../css/bootstrap.min.css" />
+<script src="../../js/axios-0.18.0.js"></script>
+<script src="../../js/jquery-3.2.1.min.js"></script>
+<script src="../../js/bootstrap.min.js"></script>
+
+
+<script>
+    new Vue({
+        el: "#admin",
+        data:{
+            //个人信息栏
+            myUser: '',
+            userPass: '',
+            sex: '',
+            UserPhone: '',
+            uid: '',
+
+            //详情页信息
+            shopsName: '',
+            shopsPrice: '',
+            shopsPic: '',
+            shopsDesc: '',
+            shopsAddress: '',
+            shopsPhone: '',
+            sCategory: '',
+            autoStatus: '',
+
+
+            myFormData: {},//我的数据列表
+
+            //查询
+            selectName: '',
+            selectDesc: '',
+
+
+            dataList: [],//当前页要展示的列表数据
+
+            goodsList: {},
+
+
+            formData: {},//表单数据
+            rules: {//校验规则
+                userUser: [{ required: true, message: '用户名为必填项', trigger: 'blur' }],
+                userPass: [{ required: true, message: '用户密码为必填项', trigger: 'blur' }]
+            }
+        },
+
+        //钩子函数，VUE对象初始化完成后自动执行
+        created() {
+            this.getAll();
+            // $("#myModal").modal("hide");
+        },
+
+        methods: {
+            //列表
+            getAll() {
+                //发送ajax请求
+                axios.get("/Shops/getAll").then((res)=>{
+                    this.dataList = res.data.data;
+                });
+            },
+            //以用户名查询
+            getByLike() {
+                axios({
+                    method: 'post',
+                    url: '/Shops/getByLike',
+                    data: {
+                        shopsName: this.selectName,
+                        shopsDesc: this.selectDesc,
+                    }
+                }).then(res=>{
+                    <!--只能查询一次-->
+                    console.log(res);
+                    if(res.data.code==1){
+                        this.dataList=res.data.data;
+                        //重置输入框
+                        this.resetSelectName();
+                        this.resetSelectDesc();
+                    }else{
+                        this.$message(res.data.msg);
+                    }
+                })
+            },
+            aaa(){
+                //测试方法
+                this.$message("测试");
+            },
+            //点击衣物
+            getOne() {
+                axios.get("/Shops/getOne").then((res)=>{
+                    this.dataList = res.data.data;
+                });
+            },
+            //点击文具
+            getTwo() {
+                axios.get("/Shops/getTwo").then((res)=>{
+                    this.dataList = res.data.data;
+                });
+            },
+            //点击书籍
+            getThree() {
+                axios.get("/Shops/getThree").then((res)=>{
+                    this.dataList = res.data.data;
+                });
+            },
+            //点击日用品
+            getFour() {
+                axios.get("/Shops/getFour").then((res)=>{
+                    this.dataList = res.data.data;
+                });
+            },
+            //点击杂物
+            getFive() {
+                axios.get("/Shops/getFive").then((res)=>{
+                    this.dataList = res.data.data;
+                });
+            },
+            //改变审核状态
+            getStatus(row){
+                axios.put("/Shops/getStatus/"+row.id).then((res)=>{
+                    //this.dataList = res.data.data;
+                    this.value=res.data.data.autoStatus;
+                    this.$message(res.data.msg);
+                });
+
+            },
+
+
+
+            //重置表单
+            resetSelectName(){
+                this.selectName='';
+            },
+            resetSelectDesc(){
+                this.selectDesc='';
+            },
+
+            //登录人员信息列表
+            getMy(){
+                // $.modal.open("查看用户信息","/User/getMy");
+                axios.get("/User/getMy").then((res)=>{
+                    // this.dataList = res.data.data;
+                    console.log(res);
+                    this.myUser=res.data.data.userUser;
+                    this.userPass=res.data.data.userPass;
+                    this.sex=res.data.data.sex;
+                    this.userPhone=res.data.data.userPhone;
+                    this.uid=res.data.data.uid;
+                });
+
+                $("#myModal").modal("show");
+            },
+            getMyGoods(){
+                axios.get("/Goods/getMy").then((res)=>{
+                    // this.dataList = res.data.data;
+                    console.log(res);
+                   this.goodsList=res.data.data;
+                    $("#myGoodsModal").modal("show");
+                });
+            },
+            updateMy(){
+                $("#myModal").modal("hide");
+                axios.get("/User/getMy").then((res)=>{
+                    console.log(res);
+                    this.myFormData=res.data.data;
+                });
+                $("#updateModal").modal("show");
+
+            },
+            handleMyEdit(){
+                axios.put("/User/update",this.myFormData).then((res)=>{
+                    //如果操作成功，关闭弹层，显示数据
+                    if(res.data.code == 1){
+                        $("#updateModal").modal("hide");
+                        this.$message.success("修改成功");
+                    }else if(res.data.code == 0){
+                        this.$message.error("修改失败");
+                    }else{
+                        this.$message.error(res.data.msg);
+                    }
+                }).finally(()=>{
+                    this.getAll();
+                });
+            },
+            //详情窗口
+           select(row) {
+                axios.get("/Shops/getById/"+row.id).then((res)=>{
+                    console.log(res);
+                    this.shopsName=res.data.data.shopsName;
+                    this.shopsPrice=res.data.data.shopsPrice;
+                    this.shopsPic=res.data.data.shopsPic;
+                    this.shopsDesc=res.data.data.shopsDesc;
+                    this.shopsAddress=res.data.data.shopsAddress;
+                    this.shopsPhone=res.data.data.shopsPhone;
+                    this.sCategory=res.data.data.scategory;
+                    this.autoStatus=res.data.data.autoStatus;
+                });
+
+                $("#shopsModal").modal("show");
+            },
+            up(row) {
+                //弹出提示框
+                this.$confirm("此操作将提交当前数据，是否继续？","提示",{
+                    type:'info'
+                }).then(()=>{
+                    //2.做删除业务
+                    axios.delete("/Shops/delete/"+row.id).then((res)=>{
+                        if (res.data.code == 1) {
+                            console.log(res.data.data);
+                            //进行添加操作，添加到goods表
+
+                            axios({
+                                method: 'post',
+                                url: '/Goods/add',
+                                data: {
+                                    id: res.data.data.id,
+                                    goodsName: res.data.data.shopsName,
+                                    goodsPrice: res.data.data.shopsPrice,
+                                    goodsPic: res.data.data.shopsPic,
+                                    goodsDesc: res.data.data.shopsDesc,
+                                    goodsAddress: res.data.data.shopsAddress,
+                                    goodsPhone: res.data.data.shopsPhone,
+                                    goodsStatus: res.data.data.shopsStatus,
+                                    autoStatus: res.data.data.autoStatus,
+                                    gCategory: res.data.data.scategory,
+                                    gid: res.data.data.sid
+                                },
+                                dataType : 'JSON',
+                                success (res){
+                                    console.log(res);
+                                }
+                            })
+                        } else {
+                            this.$message.error("提交失败");
+                        }
+                    }).finally(()=>{
+                        this.getAll();
+                    });
+                }).catch(()=>{
+                    //3.取消删除
+                    this.$message.info("取消提交操作");
+                });
+            },
+            logout(){
+                axios.post("/User/logout").then((res)=>{
+                    if(res.data.code==1){
+                        window.location.href="../login/login.html";
+                        this.$message(res.data.msg);
+                    }
+                    else{
+                        this.$message("退出失败");
+                    }
+                })
+            }
+        }
+    })
+
+</script>
+</body>
+</html>

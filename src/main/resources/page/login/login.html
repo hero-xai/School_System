@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>校园二手交易系统</title>
+
+    <style>
+        body {
+            background-image: url("/background/image.jpg");
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-size: 100% 100%;
+            background-position: center;
+            height:800px;
+            overflow:hidden ;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 设置登录框样式 */
+        .login-box {
+            margin: auto;
+            width: 400px;
+            height:400px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+
+        }
+
+        /* 设置登录标题样式 */
+        .login-title {
+            margin-bottom: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        /* 设置登录表单样式 */
+        .login-form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 设置登录表单字段样式 */
+        .login-form label {
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .login-form input {
+            padding: 10px;
+            border-radius: 3px;
+            border: 1px solid #ccc;
+        }
+
+        /* 设置登录按钮样式 */
+        .login-btn {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 3px;
+            border: none;
+            background-color: #007bff;
+            color: #fff;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div id="login" class="login-box">
+    <h1 class="login-title">用户登录</h1>
+    <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="login-form">
+        <el-form-item label="用户名" prop="name">
+            <el-input v-model="ruleForm.name" class="login-form input"></el-input>
+        </el-form-item>
+        <el-form-item label="用户权限" prop="region">
+            <el-select v-model="ruleForm.region" placeholder="请选择用户权限">
+                <el-option label="管理员" value="管理员"></el-option>
+                <el-option label="审核员" value="审核员"></el-option>
+                <el-option label="普通用户" value="普通用户"></el-option>
+            </el-select>
+        </el-form-item>
+        <el-form-item label="密码" prop="pass">
+            <el-input v-model="ruleForm.pass" class="login-form input"></el-input>
+        </el-form-item>
+        <el-form-item>
+            <el-button type="primary" @click="onSubmit(ruleForm)" class="login-btn">登录</el-button>
+            <el-button @click="handleCreate()" class="login-btn">注册</el-button>
+        </el-form-item>
+    </el-form>
+    <!-- 新增标签弹层 -->
+    <el-dialog title="注册用户" :visible.sync="dialogFormVisible">
+
+        <el-form ref="dataAddForm" :model="formData" :rules="rules" label-position="right" label-width="100px">
+            <el-form-item label="用户名" prop="userUser">
+                <el-input v-model="formData.userUser"></el-input>
+            </el-form-item>
+            <el-form-item label="密码" prop="userPass">
+                <el-input v-model="formData.userPass"></el-input>
+            </el-form-item>
+            <el-form-item label="性别" prop="sex">
+                <el-select v-model="formData.sex" placeholder="请选择用户性别">
+                    <el-option label="男" value="男"></el-option>
+                    <el-option label="女" value="女"></el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="用户权限" prop="uid">
+                <el-select v-model="formData.uid" placeholder="请选择用户权限">
+                    <el-option label="普通用户" value="普通用户"></el-option>
+                </el-select>
+            </el-form-item>
+        </el-form>
+
+        <div slot="footer" class="dialog-footer">
+
+            <el-button @click="dialogFormVisible = false">取消</el-button>
+
+            <el-button type="primary" @click="handleAdd()">确定</el-button>
+
+        </div>
+
+    </el-dialog>
+
+</div>
+
+
+
+<script src="../../js/vue.js"></script>
+<script src="../../element-ui/lib/index.js"></script>
+<link rel="stylesheet" href="../../element-ui/lib/theme-chalk/index.css"/>
+<script src="../../js/axios-0.18.0.js"></script>
+
+<script>
+    new Vue({
+        el:"#login",
+        data() {
+            return {
+                formData: {
+                    userUser: '',
+                    userPass: '',
+                    uid: '',
+                    sex: ''
+                },
+                ruleForm: {
+                    name: '',
+                    region: '',
+                    pass: ''
+                },
+                rules: {
+                    name: [
+                        { required: true, message: '请输入用户名称', trigger: 'blur' },
+                        { min: 1, max: 8, message: '长度在 1 到 8 个字符', trigger: 'blur' }
+                    ],
+                    region: [
+                        { required: true, message: '请选择用户权限', trigger: 'change' }
+                    ]
+                },
+                dialogFormVisible: false//控制表单是否可见
+            };
+        },
+        methods: {
+            onSubmit(ruleForm){
+                axios({
+                    method: 'post',
+                    url: '/User/login',
+                    data: {
+                        userUser: this.ruleForm.name,
+                        userPass: this.ruleForm.pass,
+                        uid: this.ruleForm.region
+                    }
+                }).then(res=>{
+                    console.log(res.data);
+                    if(res.data.code===200){
+                        console.log("true");
+                        if(res.data.data.uid==="管理员"){
+                            window.location.href="../myPage/adminMain.html";
+                        }else if(res.data.data.uid==="审核员"){
+                            window.location.href="../myPage/authorMain.html";
+                        }else if(res.data.data.uid==="普通用户"){
+                            window.location.href="../myPage/userMain.html";
+                        }
+                    }
+
+                    else {
+                        this.$message(res.data.msg);
+                    }
+                })
+            },
+            //弹出添加窗口
+            handleCreate() {
+                this.dialogFormVisible = true;
+            },
+            handleAdd(){
+                axios.post("/User/add",this.formData).then(res=>{
+                    console.log(res.data);
+                    if(res.data.code===200){
+                        this.beEmpty();
+                        this.dialogFormVisible = false;
+                        this.$message(res.data.msg);
+                    }
+                    if(res.data.code===409){
+                        this.formData.userUser=null;
+                        this.$message(res.data.msg);
+                    }
+                    if(res.data.code===500){
+                        this.$message("失败");
+                    }
+                })
+            },
+            //表单置空
+            beEmpty(){
+                this.formData.userUser=null;
+                this.formData.userPass=null;
+                this.formData.uid=null;
+                this.formData.sex=null;
+            }
+        }
+    })
+
+</script>
+
+</body>
+</html>
