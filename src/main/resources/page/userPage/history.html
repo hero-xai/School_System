@@ -121,7 +121,7 @@
                 }).then(()=>{
                     //2.做删除业务
                     axios.post("/User/logout").then((res)=>{
-                        if(res.data.code==1){
+                        if(res.data.code==200){
                             window.location.href="../login/login.html";
                             this.$message(res.data.msg);
                         }

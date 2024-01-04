@@ -211,7 +211,7 @@
                 }).then(()=>{
                     //2.做删除业务
                     axios.delete("/Shopping/delete/"+row.id).then((res)=>{
-                        if(res.data.code == 1){
+                        if(res.data.code == 200){
                             this.$message.success("删除成功");
                         }else{
                             this.$message.error("删除失败");
@@ -245,7 +245,7 @@
                 }).then(()=>{
                     //2.做删除业务
                     axios.delete("/Shopping/remove/"+this.id).then((res)=>{
-                        if (res.data.code == 1) {
+                        if (res.data.code == 200) {
                             console.log(res.data.data);
                             //进行添加操作，添加到History表
 
@@ -286,7 +286,7 @@
                 }).then(()=>{
                     //2.做删除业务
                     axios.post("/User/logout").then((res)=>{
-                        if(res.data.code==1){
+                        if(res.data.code==200){
                             window.location.href="../login/login.html";
                             this.$message(res.data.msg);
                         }

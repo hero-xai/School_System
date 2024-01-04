@@ -10,4 +10,6 @@ public interface ShopsService extends IService<Shops> {
     R queryBySCategory(String sCategory);
 
     R updateStatus(int id);
+
+    R getByLike(Shops shops);
 }

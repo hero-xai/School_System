@@ -61,31 +61,13 @@ public class ShopsController {
     @PostMapping("/getByLike")
     @ResponseBody
     public R getByLike(@RequestBody Shops shops){
-        String shopsName = shops.getShopsName();
-        String shopsDesc = shops.getShopsDesc();
-        R r=new R();
-        System.out.print(shopsName+"----"+shopsDesc);
-        LambdaQueryWrapper<Shops> wrapper=new LambdaQueryWrapper();
-        wrapper.like(Shops::getShopsName,shopsName);
-        wrapper.like(Shops::getShopsDesc,shopsDesc);
-        List list = shopsService.list(wrapper);
-        if(list!=null){
-            r.setCode(1);
-            r.setData(list);
-        }
-        return r;
+        return shopsService.getByLike(shops);
     }
 
     @DeleteMapping("/delete/{id}")
     @ResponseBody
     public R delete(@PathVariable int id){
-        R r=new R();
-        Shops one = shopsService.getById(id);
-        boolean remove = shopsService.removeById(id);
-        r.setCode(1);
-        r.setData(one);
-        r.setMsg("菜鸡");
-        return r;
+        return R.toAjax(shopsService.removeById(id));
     }
 
 }

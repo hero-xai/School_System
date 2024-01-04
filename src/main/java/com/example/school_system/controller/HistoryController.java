@@ -31,40 +31,11 @@ public class HistoryController {
     @PostMapping("/add")
     @ResponseBody
     public R add(@RequestBody History history){
-        R r=new R();
-
-        boolean save = historyService.save(history);
-
-        if(save){
-            r.setCode(1);
-            r.setMsg("添加成功");
-            return r;
-        }
-
-        r.setCode(0);
-        r.setMsg("失败");
-        return r;
+        return R.toAjax(historyService.save(history));
     }
     @GetMapping("/getAll")
     @ResponseBody
     public R getAll(HttpServletRequest request){
-        R r=new R();
-        //获取用户
-        Object user = request.getSession().getAttribute("user");
-        String username=(String)user;
-        LambdaQueryWrapper<User> wrapper=new LambdaQueryWrapper<>();
-        wrapper.eq(User::getUserUser,username);
-        User one = userService.getOne(wrapper);
-
-        //获取本用户id
-        int hid = one.getId();
-
-
-        LambdaQueryWrapper<History> myWrapper=new LambdaQueryWrapper<>();
-        myWrapper.eq(History::getHid,hid);
-        List<History> list = historyService.list(myWrapper);
-        r.setData(list);
-        r.setCode(1);
-        return r;
+        return historyService.getAll(request);
     }
 }

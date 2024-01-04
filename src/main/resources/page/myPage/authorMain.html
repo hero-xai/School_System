@@ -290,7 +290,7 @@
                 }).then(res=>{
                     <!--只能查询一次-->
                     console.log(res);
-                    if(res.data.code==1){
+                    if(res.data.code==200){
                         this.dataList=res.data.data;
                         //重置输入框
                         this.resetSelectName();
@@ -359,11 +359,9 @@
             handleMyEdit(){
                 axios.put("/User/update",this.myFormData).then((res)=>{
                     //如果操作成功，关闭弹层，显示数据
-                    if(res.data.code == 1){
+                    if(res.data.code == 200){
                         $("#updateModal").modal("hide");
                         this.$message.success("修改成功");
-                    }else if(res.data.code == 0){
-                        this.$message.error("修改失败");
                     }else{
                         this.$message.error(res.data.msg);
                     }
@@ -394,7 +392,7 @@
                 }).then(()=>{
                     //2.做删除业务
                     axios.delete("/Shops/delete/"+row.id).then((res)=>{
-                        if (res.data.code == 1) {
+                        if (res.data.code == 200) {
                             console.log(res.data.data);
                             //进行添加操作，添加到goods表
 
@@ -432,7 +430,7 @@
             },
             logout(){
                 axios.post("/User/logout").then((res)=>{
-                    if(res.data.code==1){
+                    if(res.data.code==200){
                         window.location.href="../login/login.html";
                         this.$message(res.data.msg);
                     }

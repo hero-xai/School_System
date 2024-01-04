@@ -1,6 +1,7 @@
 package com.example.school_system.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.example.school_system.commom.HttpStatus;
 import com.example.school_system.commom.R;
 import com.example.school_system.entity.Goods;
 import com.example.school_system.entity.Shops;
@@ -27,23 +28,7 @@ public class GoodsController {
     @PostMapping("/add")
     @ResponseBody
     public R add(@RequestBody Goods goods,HttpServletRequest request){
-        R r=new R();
-        String user = (String)request.getSession().getAttribute("user");
-        goods.setAutoId(user);
-
-        int gid = goods.getGid();
-
-        boolean save = goodsService.save(goods);
-
-        if(save){
-            r.setCode(1);
-            r.setMsg("提交成功");
-            return r;
-        }
-
-        r.setCode(0);
-        r.setMsg("失败");
-      return r;
+        return goodsService.add(goods,request);
     }
 
     /***
@@ -60,13 +45,7 @@ public class GoodsController {
     @GetMapping("/getAll")
     @ResponseBody
     public R getAll(){
-        R r=new R();
-        LambdaQueryWrapper<Goods> wrapper=new LambdaQueryWrapper<>();
-        wrapper.eq(Goods::getAutoStatus,1);
-        List<Goods> list = goodsService.list(wrapper);
-        r.setData(list);
-        r.setCode(1);
-        return r;
+        return goodsService.getAll();
     }
 
     /***
@@ -87,28 +66,7 @@ public class GoodsController {
     @PostMapping("/getByLike")
     @ResponseBody
     public R getByLike(@RequestBody Goods goods){
-        String goodsName = goods.getGoodsName();
-        String goodsDesc = goods.getGoodsDesc();
-
-        R r=new R();
-        //查询数据为空
-        if(goodsName==""&&goodsDesc==""){
-            r.setCode(0);
-            r.setMsg("没有数据你查个屁");
-            return r;
-        }
-
-        LambdaQueryWrapper<Goods> wrapper=new LambdaQueryWrapper<Goods>();
-        //只显示过审核的商品
-        wrapper.eq(Goods::getAutoStatus,1);
-        wrapper.like(Goods::getGoodsName,goodsName);
-        wrapper.like(Goods::getGoodsDesc,goodsDesc);
-        List<Goods> list = goodsService.list(wrapper);
-        if(list!=null){
-            r.setCode(1);
-            r.setData(list);
-        }
-        return r;
+        return goodsService.getByLike(goods);
     }
 
     /***
@@ -119,25 +77,7 @@ public class GoodsController {
     @PostMapping("/getUp")
     @ResponseBody
     public R getUp(@RequestBody Goods goods){
-        String goodsPrice = goods.getGoodsPrice();
-        R r=new R();
-        //查询数据为空
-        if(goodsPrice==null||goodsPrice==""){
-            r.setCode(0);
-            r.setMsg("没有数据你查个屁");
-            return r;
-        }
-
-
-        LambdaQueryWrapper<Goods> wrapper=new LambdaQueryWrapper<Goods>();
-        //只显示过审核的商品
-        wrapper.eq(Goods::getAutoStatus,1);
-        wrapper.ge(Goods::getGoodsPrice,goodsPrice);
-        List<Goods> list = goodsService.list(wrapper);
-            r.setCode(1);
-            r.setData(list);
-            r.setMsg("查询成功");
-        return r;
+        return goodsService.getUp(goods);
     }
 
     /***
@@ -148,37 +88,13 @@ public class GoodsController {
     @PostMapping("/getDown")
     @ResponseBody
     public R getDown(@RequestBody Goods goods){
-        String goodsPrice = goods.getGoodsPrice();
-        R r=new R();
-        //查询数据为空
-        if(goodsPrice==null||goodsPrice==""){
-            r.setCode(0);
-            r.setMsg("没有数据你查个屁");
-            return r;
-        }
-
-        LambdaQueryWrapper<Goods> wrapper=new LambdaQueryWrapper<Goods>();
-        //只显示过审核的商品
-        wrapper.eq(Goods::getAutoStatus,1);
-        wrapper.le(Goods::getGoodsPrice,goodsPrice);
-        List<Goods> list = goodsService.list(wrapper);
-        r.setCode(1);
-        r.setData(list);
-        r.setMsg("查询成功");
-        return r;
+        return goodsService.getDown(goods);
     }
 
     @GetMapping("/getById/{id}")
     @ResponseBody
     public R getById(@PathVariable int id){
-        R r=new R();
-        LambdaQueryWrapper<Goods> wrapper=new LambdaQueryWrapper<>();
-        wrapper.eq(Goods::getId,id);
-        Goods one = goodsService.getOne(wrapper);
-        r.setCode(1);
-        r.setData(one);
-        r.setMsg("菜鸡");
-        return r;
+        return new R(HttpStatus.SUCCESS,null,goodsService.getById(id));
     }
 
 

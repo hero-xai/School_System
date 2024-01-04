@@ -272,7 +272,7 @@
                 }).then(res=>{
                     <!--只能查询一次-->
                     console.log(res);
-                    if(res.data.code==1){
+                    if(res.data.code==200){
                         this.dataList=res.data.data;
                         //重置输入框
                         this.resetSelectName();
@@ -370,7 +370,7 @@
                 }).then(()=>{
                     //2.做查询业务
                     axios.get("/Goods/getById/"+row.id).then((res)=>{
-                        if (res.data.code == 1) {
+                        if (res.data.code == 200) {
                             console.log(res.data.data);
                             //进行添加操作，添加到shopping表
 

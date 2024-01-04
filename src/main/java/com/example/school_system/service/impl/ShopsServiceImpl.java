@@ -61,4 +61,25 @@ public class ShopsServiceImpl extends ServiceImpl<ShopsMapper, Shops> implements
 
         //todo 审核完是否加入其他表
     }
+
+    /***
+     * 按名称信息查询
+     * @param
+     * @return
+     */
+    @Override
+    public R getByLike(Shops shops) {
+        String shopsName = shops.getShopsName();
+        String shopsDesc = shops.getShopsDesc();
+        R r=new R();
+        LambdaQueryWrapper<Shops> wrapper=new LambdaQueryWrapper();
+        wrapper.like(Shops::getShopsName,shopsName);
+        wrapper.like(Shops::getShopsDesc,shopsDesc);
+        List list = this.list(wrapper);
+        if(list!=null){
+            r.setCode(HttpStatus.SUCCESS);
+            r.setData(list);
+        }
+        return r;
+    }
 }
