@@ -85,7 +85,7 @@
             </el-select>
         </el-form-item>
         <el-form-item label="密码" prop="pass">
-            <el-input v-model="ruleForm.pass" class="login-form input"></el-input>
+            <el-input v-model="ruleForm.pass" class="login-form input" type="password"></el-input>
         </el-form-item>
         <el-form-item>
             <el-button type="primary" @click="onSubmit(ruleForm)" class="login-btn">登录</el-button>
@@ -157,6 +157,21 @@
                     ],
                     region: [
                         { required: true, message: '请选择用户权限', trigger: 'change' }
+                    ],
+                    pass: [
+                        { required: true, message: '请输入用户密码', trigger: 'blur' },
+                        { min: 1, max: 8, message: '长度在 1 到 8 个字符', trigger: 'blur' }
+                    ],
+                    userUser: [
+                        { required: true, message: '请输入用户名称', trigger: 'blur' },
+                        { min: 1, max: 8, message: '长度在 1 到 8 个字符', trigger: 'blur' }
+                    ],
+                    uid: [
+                        { required: true, message: '请选择用户权限', trigger: 'change' }
+                    ],
+                    userPass: [
+                        { required: true, message: '请输入用户密码', trigger: 'blur' },
+                        { min: 1, max: 8, message: '长度在 1 到 8 个字符', trigger: 'blur' }
                     ]
                 },
                 dialogFormVisible: false//控制表单是否可见
@@ -200,14 +215,17 @@
                     if(res.data.code===200){
                         this.beEmpty();
                         this.dialogFormVisible = false;
-                        this.$message(res.data.msg);
+                        this.$message({
+                            message: res.data.msg,
+                            type: 'success'
+                        });
                     }
                     if(res.data.code===409){
                         this.formData.userUser=null;
-                        this.$message(res.data.msg);
+                        this.$message.error(res.data.msg);
                     }
                     if(res.data.code===500){
-                        this.$message("失败");
+                        this.$message.error(res.data.msg);
                     }
                 })
             },

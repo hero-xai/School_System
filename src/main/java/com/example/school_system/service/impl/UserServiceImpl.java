@@ -120,11 +120,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public R add(User user) {
         R r=new R();
         String userUser = user.getUserUser();
+        String userPass = user.getUserPass();
+        String uid = user.getUid();
         LambdaQueryWrapper<User> wrapper=new LambdaQueryWrapper<>();
         wrapper.eq(User::getUserUser,userUser);
         List<User> list = this.list(wrapper);
         //用户名未重复
         if(list.size()==0){
+            if(StringUtils.isEmpty(userUser)||StringUtils.isEmpty(userPass)||StringUtils.isEmpty(uid)){
+                r.setCode(HttpStatus.ERROR);
+                r.setMsg("用户名/密码/权限为必填项,请重新输入");
+                return r;
+            }
+
             this.save(user);
             r.setCode(HttpStatus.SUCCESS);
             r.setMsg("创建成功");
