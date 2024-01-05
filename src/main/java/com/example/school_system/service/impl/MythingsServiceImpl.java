@@ -101,6 +101,13 @@ public class MythingsServiceImpl extends ServiceImpl<MythingsMapper, Mythings> i
             //加入数据
             shopsService.save(shops);
 
+            boolean b = this.saveOrUpdate(one);
+            r.setCode(HttpStatus.SUCCESS);
+            r.setData(one);
+            r.setMsg("上架成功");
+
+            return r;
+
         } else if (one.getMythingsStatus()==1) {
             one.setMythingsStatus(0);
 
@@ -110,11 +117,16 @@ public class MythingsServiceImpl extends ServiceImpl<MythingsMapper, Mythings> i
             wrapper1.eq(Goods::getGoodsPrice,one.getMythingsPrice());
             wrapper1.eq(Goods::getGoodsPic,one.getMythingsPic());
             goodsService.remove(wrapper1);
+
+            boolean b = this.saveOrUpdate(one);
+            r.setCode(HttpStatus.SUCCESS);
+            r.setData(one);
+            r.setMsg("下架成功");
+
+            return r;
         }
-        boolean b = this.saveOrUpdate(one);
-        r.setCode(HttpStatus.SUCCESS);
-        r.setData(one);
-        r.setMsg("状态已改变");
+        r.setCode(HttpStatus.ERROR);
+        r.setMsg("状态改变出现问题");
         return r;
     }
 }

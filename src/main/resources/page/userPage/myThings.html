@@ -53,7 +53,7 @@
     <template>
 
         <el-table size="small" current-row-key="id" :data="dataList" stripe highlight-current-row>
-            <el-table-column prop="mythingsName" align="center" label="商品名称"></el-table-column>
+            <el-table-column prop="mythingsName" align="center" label="商品名称" ></el-table-column>
             <el-table-column prop="mythingsPrice" align="center" label="商品价格"></el-table-column>
             <el-table-column prop="mythingsPic" label="商品图片" align="center">
                 <template slot-scope="scope">
@@ -67,8 +67,8 @@
                             v-model="scope.row.mythingsStatus"
                             active-color="#13ce66"
                             inactive-color="#ff4949"
-                            active-value="1"
-                            inactive-value="0"
+                            :active-value="1"
+                            :inactive-value="0"
                             @change="getStatus(scope.row)">
                     </el-switch>
                 </template>
@@ -317,7 +317,10 @@
                 axios.put("/Mythings/update",this.updateData).then(res=>{
                     console.log(res);
                     if(res.data.code==200){
-                        this.$message(res.data.msg);
+                        this.$message({
+                            message: res.data.msg,
+                            type: 'success'
+                        });
                         $("#updateModal").modal("hide");
                         this.getAll();
                     }else{
@@ -351,7 +354,14 @@
                 axios.put("/Mythings/getStatus/"+row.id).then((res)=>{
                     //this.dataList = res.data.data;
                     this.mythingsStatus=res.data.data.mythingsStatus;
-                    this.$message(res.data.msg);
+                    if(res.data.code==200) {
+                        this.$message({
+                            message: res.data.msg,
+                            type: 'success'
+                        });
+                    }else {
+                        this.$message.error(res.data.msg);
+                    }
                 });
             },
             //获取图片地址
