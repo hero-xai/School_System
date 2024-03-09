@@ -31,8 +31,8 @@ public class ShoppingController {
      */
     @PostMapping("/add")
     @ResponseBody
-    public R add(@RequestBody Shopping shopping){
-        return R.toAjax(shoppingService.save(shopping));
+    public R add(@RequestBody Shopping shopping,HttpServletRequest request){
+        return shoppingService.add(shopping,request);
     }
     @GetMapping("/getAll")
     @ResponseBody
@@ -55,6 +55,6 @@ public class ShoppingController {
     @DeleteMapping("/remove/{id}")
     @ResponseBody
     public R remove(@PathVariable int id){
-        return R.toAjax(shoppingService.removeById(id));
+        return shoppingService.removeAndReturnId(id);
     }
 }

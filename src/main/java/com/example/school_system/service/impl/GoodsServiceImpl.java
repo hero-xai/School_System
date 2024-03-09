@@ -8,13 +8,19 @@ import com.example.school_system.entity.Goods;
 import com.example.school_system.entity.Shops;
 import com.example.school_system.mapper.GoodsMapper;
 import com.example.school_system.service.GoodsService;
+import com.example.school_system.service.ShopsService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements GoodsService {
+
+    @Autowired
+    private ShopsService shopsService;
     @Override
     public R queryByGCategory(String gCategory) {
         R r=new R();
@@ -141,5 +147,38 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         r.setData(list);
         r.setMsg("查询成功");
         return r;
+    }
+
+    @Override
+    public R addById(Goods goods,HttpServletRequest request) {
+        R r=new R();
+//        //shops复制到goods
+//        LambdaQueryWrapper<Shops> getWrapper=new LambdaQueryWrapper();
+//        getWrapper.eq(Shops::getId,id);
+//        Shops shops = shopsService.getOne(getWrapper);
+//
+//        Goods goods=new Goods();
+//        goods.setId(shops.getId());
+//        goods.setGoodsName(shops.getShopsName());
+//        goods.setGoodsPrice(shops.getShopsPrice());
+//        goods.setGoodsPic(shops.getShopsPic());
+//        goods.setGoodsDesc(shops.getShopsDesc());
+//        goods.setGoodsAddress(shops.getShopsAddress());
+//        goods.setGoodsPhone(shops.getShopsPhone());
+//        goods.setGoodsStatus(shops.getShopsStatus());
+//        goods.setAutoStatus(shops.getAutoStatus());
+
+        String user =(String) (request.getSession().getAttribute("user"));
+        goods.setAutoId(user);
+
+        boolean save = this.save(goods);
+
+
+        r.setCode(HttpStatus.SUCCESS);
+        r.setData(save);
+        r.setMsg("添加成功");
+
+        return r;
+
     }
 }

@@ -48,18 +48,19 @@ public class ShopsServiceImpl extends ServiceImpl<ShopsMapper, Shops> implements
         if(one.getAutoStatus()==0){
             one.setAutoStatus(1);
             this.saveOrUpdate(one);
-            r.setMsg("审核未通过");
+            r.setMsg("商品审核通过");
             r.setCode(HttpStatus.SUCCESS);
+            r.setData("YES");
         } else if (one.getAutoStatus()==1) {
             one.setAutoStatus(0);
             this.saveOrUpdate(one);
-            r.setMsg("审核通过");
+            r.setMsg("商品审核未通过");
             r.setCode(HttpStatus.SUCCESS);
+            r.setData("NO");
         }
 
         return r;
 
-        //todo 审核完是否加入其他表
     }
 
     /***
@@ -81,5 +82,13 @@ public class ShopsServiceImpl extends ServiceImpl<ShopsMapper, Shops> implements
             r.setData(list);
         }
         return r;
+    }
+
+    @Override
+    public Boolean deleteById(int id) {
+        LambdaQueryWrapper<Shops> deleteWrapper=new LambdaQueryWrapper();
+        deleteWrapper.eq(Shops::getId,id);
+        boolean remove = this.remove(deleteWrapper);
+        return  remove;
     }
 }

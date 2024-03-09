@@ -12,4 +12,6 @@ public interface ShopsService extends IService<Shops> {
     R updateStatus(int id);
 
     R getByLike(Shops shops);
+
+    Boolean deleteById(int id);
 }

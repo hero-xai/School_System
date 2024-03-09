@@ -1,6 +1,8 @@
 package com.example.school_system.entity;
 
 public class History {
+
+    private int historyId;
     private String historyName;
     private String historyPrice;
     private String historyPic;

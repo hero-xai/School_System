@@ -304,7 +304,7 @@
                         this.dialogFormVisible = false;
                         this.$message.success(res.data.msg);
                     }if(res.data.code == 500){
-                        this.$message.error("添加失败");
+                        this.$message.error(res.data.msg);
                     }if(res.data.code == 409){
                         this.formData.userUser= null;
                         this.$message.error(res.data.msg);
@@ -376,8 +376,6 @@
                     if(res.data.code == 200){
                         this.dialogFormVisible4Edit = false;
                         this.$message.success("修改成功");
-                    }else if(res.data.code == 500){
-                        this.$message.error("修改失败");
                     }else{
                         this.$message.error(res.data.msg);
                     }
@@ -394,6 +392,7 @@
                 }).then(()=>{
                     //2.做删除业务
                     axios.delete("/User/delete/"+row.id).then((res)=>{
+                        console.log(res.status)
                         if(res.data.code == 200){
                             this.$message.success("删除成功");
                         }else{
@@ -417,6 +416,9 @@
                         this.$message("退出失败");
                     }
                 })
+            },
+            to(){
+                window.location.href="../myPage/Main.html";
             }
         }
     })

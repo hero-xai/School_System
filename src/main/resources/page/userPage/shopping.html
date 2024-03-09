@@ -246,9 +246,7 @@
                     //2.做删除业务
                     axios.delete("/Shopping/remove/"+this.id).then((res)=>{
                         if (res.data.code == 200) {
-                            console.log(res.data.data);
                             //进行添加操作，添加到History表
-
                             axios({
                                 method: 'post',
                                 url: '/History/add',
@@ -262,7 +260,7 @@
                                     hid: res.data.data.shoppingId
                                 }
                             }).then(res=>{
-                                this.$message("添加历史记录成功");
+                                this.$message.success("确认购买成功，已添加历史记录");
                                 $("#purchaseModal").modal("hide");
                             })
                         } else {

@@ -52,13 +52,25 @@ public class MythingsController {
     @DeleteMapping("/delete/{id}")
     @ResponseBody
     public R delete(@PathVariable int id){
-        return R.toAjax(mythingsService.removeById(id));
+        return mythingsService.removeByIdAndGoods(id);
     }
 
     @PutMapping("/getStatus/{id}")
     @ResponseBody
     public R getStatus(@PathVariable int id){
         return mythingsService.getStatus(id);
+    }
+
+    @PostMapping("/reGetStatus")
+    @ResponseBody
+    public R getStatus(@RequestBody Shopping shopping){
+        return mythingsService.reGetStatus(shopping);
+    }
+
+    @GetMapping("/updateStatus/{id}")
+    @ResponseBody
+    public R updateStatus(@PathVariable int id){
+        return mythingsService.updateStatus(id);
     }
 
 }

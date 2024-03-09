@@ -235,10 +235,12 @@
             uid: '',
 
             //详情页信息
+            id: '',
             shopsName: '',
             shopsPrice: '',
             shopsPic: '',
             shopsDesc: '',
+            shopsStatus: '',
             shopsAddress: '',
             shopsPhone: '',
             sCategory: '',
@@ -309,7 +311,13 @@
             getStatus(row){
                 axios.put("/Shops/updateStatus/"+row.id).then((res)=>{
                     //this.dataList = res.data.data;
-                    this.$message(res.data.msg);
+                    console.log(res)
+                    if(res.data.data == "YES"){
+                        this.$message.success(res.data.msg);
+                    }else{
+                        this.$message.error(res.data.msg);
+                    }
+
                     this.getAll();
                 });
 
@@ -390,43 +398,47 @@
                 this.$confirm("此操作将提交当前数据，是否继续？","提示",{
                     type:'info'
                 }).then(()=>{
-                    //2.做删除业务
-                    axios.delete("/Shops/delete/"+row.id).then((res)=>{
-                        if (res.data.code == 200) {
-                            console.log(res.data.data);
-                            //进行添加操作，添加到goods表
+                    console.log(row.autoStatus)
+                    console.log(row.id)
+                    console.log(row)
+                        //进行添加操作，添加到goods表
+                        axios({
+                            method: 'post',
+                            url: '/Goods/addById',
+                            data: {
+                                id: row.id,
+                                goodsName: row.shopsName,
+                                goodsPrice: row.shopsPrice,
+                                goodsPic: row.shopsPic,
+                                goodsDesc: row.shopsDesc,
+                                goodsAddress: row.shopsAddress,
+                                goodsPhone: row.shopsPhone,
+                                goodsStatus: row.shopsStatus,
+                                autoStatus: row.autoStatus,
+                                gCategory: row.scategory,
+                                gid: row.sid,
+                            }
+                        })
+                    if(row.autoStatus==0){
+                        //未通过审核写通知 todo
+                        axios.get("/Messages/addMsg/"+row.sid).then((res)=>{
+                            console.log(res);
+                        })
+                        //将mythings状态修改成为上架
+                        axios.get("/Mythings/updateStatus/"+row.id).then((res)=>{
+                            console.log(res);
+                        })
+                    }
 
-                            axios({
-                                method: 'post',
-                                url: '/Goods/add',
-                                data: {
-                                    id: res.data.data.id,
-                                    goodsName: res.data.data.shopsName,
-                                    goodsPrice: res.data.data.shopsPrice,
-                                    goodsPic: res.data.data.shopsPic,
-                                    goodsDesc: res.data.data.shopsDesc,
-                                    goodsAddress: res.data.data.shopsAddress,
-                                    goodsPhone: res.data.data.shopsPhone,
-                                    goodsStatus: res.data.data.shopsStatus,
-                                    autoStatus: res.data.data.autoStatus,
-                                    gCategory: res.data.data.scategory,
-                                    gid: res.data.data.sid
-                                },
-                                dataType : 'JSON',
-                                success (res){
-                                    console.log(res);
-                                }
-                            })
-                        } else {
-                            this.$message.error("提交失败");
-                        }
-                    }).finally(()=>{
-                        this.getAll();
-                    });
+                    //删除shops表
+                    console.log("删除shops表"+row.id);
+                    axios.delete("/Shops/delete/"+row.id)
+                    this.$message.success("提交成功");
+                    this.getAll()
                 }).catch(()=>{
                     //3.取消删除
                     this.$message.info("取消提交操作");
-                });
+                })
             },
             logout(){
                 axios.post("/User/logout").then((res)=>{

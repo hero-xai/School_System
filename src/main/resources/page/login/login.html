@@ -196,12 +196,13 @@
                         }else if(res.data.data.uid==="审核员"){
                             window.location.href="../myPage/authorMain.html";
                         }else if(res.data.data.uid==="普通用户"){
-                            window.location.href="../myPage/userMain.html";
+                            //window.location.href="../myPage/userMain.html";
+                            window.location.href="../myPage/Main.html";
                         }
                     }
 
                     else {
-                        this.$message(res.data.msg);
+                        this.$message.error(res.data.msg);
                     }
                 })
             },

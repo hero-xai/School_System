@@ -1,6 +1,10 @@
 package com.example.school_system.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+
 public class Mythings {
+    @TableId(type = IdType.AUTO)
     private int id;
     private String mythingsName;
     private String mythingsPrice;

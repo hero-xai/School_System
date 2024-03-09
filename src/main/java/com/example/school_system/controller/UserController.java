@@ -69,13 +69,14 @@ public class UserController {
 
     /**
      * 修改用户信息
+     * 当用户名密码为空时，修改失败
      * @param user
      * @return
      */
     @PutMapping("/update")
     @ResponseBody
     public R update(@RequestBody User user){
-        return R.toAjax(userService.updateById(user));
+        return userService.updateToId(user);
     }
 
     /**
@@ -86,7 +87,7 @@ public class UserController {
     @DeleteMapping("/delete/{id}")
     @ResponseBody
     public R delete(@PathVariable int id){
-       return R.toAjax(userService.removeById(id));
+       return userService.deleteById(id);
     }
 
     /***

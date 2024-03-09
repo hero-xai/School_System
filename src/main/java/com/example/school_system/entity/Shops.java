@@ -8,7 +8,7 @@ import lombok.Data;
  * */
 @Data
 public class Shops {
-    @TableId(type = IdType.AUTO)
+
     private Integer id;
     private String shopsName;
     private String shopsPrice;

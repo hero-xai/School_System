@@ -95,7 +95,7 @@
                     <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
                 </div>
                 <div class="modal-body">
-                    <el-form  :model="myFormData" :rules="rules" label-position="right" label-width="100px">
+                    <el-form  :model="myFormData" label-position="right" label-width="100px">
 
                         <el-form-item label="商品名称" prop="mythingsName">
                             <el-input v-model="mythingsName"></el-input>
@@ -148,7 +148,7 @@
                     <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
                 </div>
                 <div class="modal-body">
-                    <el-form  :model="updateData" :rules="rules" label-position="right" label-width="100px">
+                    <el-form  :model="updateData" label-position="right" label-width="100px">
 
                         <el-form-item label="商品名称" prop="mythingsName">
                             <el-input v-model="updateData.mythingsName"></el-input>
@@ -203,7 +203,7 @@
                 mythingsPic: '',
                 mythingsDesc: ''
             },
-            //myFormData: {},新增数据
+            myFormData: {},//新增数据
             mythingsName: '',
             mythingsPrice: '',
             mythingsPic: '',
@@ -256,12 +256,17 @@
                  $("#addModal").modal("show");
                 },
                 resetMyFormData(){
-                 this.myFormData='';
+                    this.mythingsName= '';
+                    this.mythingsPrice= '';
+                    this.mythingsPic= '';
+                    this.mythingsDesc= '';
+                    this.mythingsAddress= '';
+                    this.category= '';
                 },
                 add(){
                     axios.get("/common/getURL").then(res=>{
                         console.log(res.data);
-                        this.mythingsPic="/phone/"+res.data;
+                        this.mythingsPic="../phone/"+res.data;
                         console.log(this.mythingsPic);
                         this.addNext();
                     });
@@ -294,12 +299,12 @@
                 }).then(res=>{
                     console.log(res);
                     if(res.data.code==200){
-                        this.$message(res.data.msg);
+                        this.$message.success(res.data.msg);
                         $("#addModal").modal("hide");
                         this.resetMyFormData();
                         this.getAll();
                     }else{
-                        this.$message("新增失败,请重试");
+                        this.$message.error(res.data.msg);
                     }
                 })
             }
@@ -331,7 +336,7 @@
             // 删除
             handleDelete(row) {
                 //1.弹出提示框
-                this.$confirm("此操作永久删除当前数据，是否继续？","提示",{
+                this.$confirm("删除当前商品，物品也将下架，是否继续？","提示",{
                     type:'info'
                 }).then(()=>{
                     //2.做删除业务
@@ -352,15 +357,35 @@
             //改变审核状态
             getStatus(row){
                 axios.put("/Mythings/getStatus/"+row.id).then((res)=>{
-                    //this.dataList = res.data.data;
-                    this.mythingsStatus=res.data.data.mythingsStatus;
-                    if(res.data.code==200) {
-                        this.$message({
-                            message: res.data.msg,
-                            type: 'success'
-                        });
-                    }else {
+                    console.log("111")
+                    console.log(res)
+                    if (res.data.code==200){
+                        console.log("200")
+                        this.mythingsStatus=res.data.mythingsStatus;
+                        this.$message.success(res.data.msg);
+                    }
+                    if (res.data.code==500){
+                        console.log("500")
                         this.$message.error(res.data.msg);
+                        this.getAll();
+                    }
+                    //this.mythingsStatus=res.data.data.mythingsStatus;
+                    if(res.data.code==409) {
+                        console.log("409")
+                        this.$confirm(res.data.msg,"提示",{
+                            type:'info'
+                        }).then(()=>{
+                            console.log("进弹窗了")
+                            axios.post("/Mythings/reGetStatus",res.data.data).then((res)=>{
+                                if(res.data.code == 200){
+                                    this.$message.success(res.data.msg);
+                                }else{
+                                    this.$message.error(res.data.msg);
+                                }
+                            }).finally(()=>{
+                                this.getAll();
+                            });
+                        })
                     }
                 });
             },

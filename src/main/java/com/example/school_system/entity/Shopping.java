@@ -1,6 +1,10 @@
 package com.example.school_system.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+
 public class Shopping {
+    @TableId(type = IdType.AUTO)
     private int id;
     private String shoppingName;
     private String shoppingPrice;
@@ -9,6 +13,8 @@ public class Shopping {
     private String shoppingAddress;
     private String shoppingPhone;
     private int shoppingId;
+
+    private int authorId;
 
     public Shopping() {
     }
@@ -75,5 +81,13 @@ public class Shopping {
 
     public void setShoppingId(int shoppingId) {
         this.shoppingId = shoppingId;
+    }
+
+    public int getAuthorId() {
+        return authorId;
+    }
+
+    public void setAuthorId(int authorId) {
+        this.authorId = authorId;
     }
 }

@@ -194,6 +194,15 @@
                 </div><!-- /.modal-dialog -->
             </div><!-- /.modal -->
 
+        <el-dialog :visible.sync="showDialog">
+            <span slot="title">未读消息</span>
+            <!-- 在这里展示未读消息的内容 -->
+            <p v-for="message in unreadMessages">{{ message.content }}</p >
+            <div slot="footer">
+                <el-button @click="markAsRead()">确定</el-button>
+            </div>
+        </el-dialog>
+
     </el-container>
 </div>
 <script src="../../js/vue.js"></script>
@@ -226,6 +235,9 @@
             gCategory: '',
             autoStatus: '',
 
+            showDialog: false, // 控制弹窗的显示与隐藏
+            unreadMessages: [], // 存储未读消息的数组
+
 
             myFormData: {},//我的数据列表
 
@@ -251,6 +263,11 @@
         created() {
             this.getAll();
             // $("#myModal").modal("hide");
+            //this.getAllUnreadMessages();
+        },
+        mounted() {
+            // 当页面加载完成时获取未读消息
+            this.getAllUnreadMessages();
         },
 
         methods: {
@@ -462,8 +479,26 @@
                         this.$message("退出失败");
                     }
                 })
+            },
+            getAllUnreadMessages() {
+                axios.get("/Messages/getAllNot").then((res)=>{
+                    this.unreadMessages = res.data.data; // 将获取到的未读消息存储在数组中
+
+                    if(this.unreadMessages!=null&& this.unreadMessages.length>0){
+                        this.showDialog = true; // 显示弹窗
+                    }
+
+                })
+            },
+            markAsRead() {
+                // 将未读消息标记为已读的逻辑
+                axios.post("/Messages/markAsRead",this.unreadMessages).then((res)=>{
+                    this.showDialog = false; // 关闭弹窗
+                })
             }
-        }
+        },
+
+
     })
 </script>
 </body>

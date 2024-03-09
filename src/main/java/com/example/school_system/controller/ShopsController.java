@@ -70,4 +70,11 @@ public class ShopsController {
         return R.toAjax(shopsService.removeById(id));
     }
 
+    @DeleteMapping("/deleteById/{id}")
+    @ResponseBody
+    public R deleteByid(@PathVariable int id){
+        return R.toAjax(shopsService.deleteById(id));
+    }
+
+
 }

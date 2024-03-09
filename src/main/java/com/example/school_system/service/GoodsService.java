@@ -19,4 +19,6 @@ public interface GoodsService extends IService<Goods> {
     R getUp(Goods goods);
 
     R getDown(Goods goods);
+
+    R addById(Goods goods,HttpServletRequest request);
 }

@@ -97,5 +97,9 @@ public class GoodsController {
         return new R(HttpStatus.SUCCESS,null,goodsService.getById(id));
     }
 
-
+    @PostMapping("/addById")
+    @ResponseBody
+    public R addById(@RequestBody Goods goods,HttpServletRequest request){
+        return goodsService.addById(goods,request);
+    }
 }

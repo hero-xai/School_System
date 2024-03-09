@@ -40,4 +40,43 @@ public class ShoppingServiceImpl extends ServiceImpl<ShoppingMapper, Shopping> i
         r.setCode(HttpStatus.SUCCESS);
         return r;
     }
+
+    @Override
+    public R add(Shopping shopping, HttpServletRequest request) {
+        R r=new R();
+
+        //获取登录人id
+        String user =(String) (request.getSession().getAttribute("user"));
+        LambdaQueryWrapper<User> userWrapper = new LambdaQueryWrapper<>();
+        userWrapper.eq(User::getUserUser,user);
+        User one = userService.getOne(userWrapper);
+
+        shopping.setAuthorId(one.getId());
+
+        boolean save = this.save(shopping);
+
+
+        r.setCode(HttpStatus.SUCCESS);
+        r.setData(save);
+        r.setMsg("添加成功");
+
+        return r;
+    }
+
+    @Override
+    public R removeAndReturnId(int id) {
+        R r=new R();
+
+        //获取将要删除的数据
+        LambdaQueryWrapper<Shopping> getWrapper=new LambdaQueryWrapper<>();
+        getWrapper.eq(Shopping::getId,id);
+        Shopping shopping = this.getOne(getWrapper);
+        r.setData(shopping);
+
+        this.removeById(id);
+
+        r.setCode(HttpStatus.SUCCESS);
+        r.setMsg("删除成功");
+        return r;
+    }
 }

@@ -22,4 +22,8 @@ public interface UserService extends IService<User> {
     R logout(HttpServletRequest request);
 
     R add(User user);
+
+    R deleteById(int id);
+
+    R updateToId(User user);
 }
